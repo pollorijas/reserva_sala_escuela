@@ -1,6 +1,6 @@
 // Configuración de Supabase - REEMPLAZA CON TUS CREDENCIALES
-const supabaseUrl = 'https://tu-proyecto.supabase.co'; // Tu URL de Supabase
-const supabaseKey = 'tu-anon-key'; // Tu API key pública
+const supabaseUrl = 'https://iuspypmzrwzlqolbkjhl.supabase.co'; // Tu URL de Supabase
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1c3B5cG16cnd6bHFvbGJramhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1OTA5NDIsImV4cCI6MjA3NjE2Njk0Mn0.da86H7bm7lZ5T66qaNyjl1iflQ1xN-iy_5wanhdLzHE'; // Tu API key pública
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // Variables globales

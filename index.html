@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Sala Escolar</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Registro de Uso de Sala</h1>
+        
+        <div class="semana-selector">
+            <label for="selectSemana">Seleccionar Semana:</label>
+            <select id="selectSemana">
+                <option value="">Cargando semanas...</option>
+            </select>
+            <button onclick="crearNuevaSemana()">Nueva Semana</button>
+        </div>
+
+        <div id="tabla-container">
+            <table class="tabla-horarios" id="tablaHorarios">
+                <thead>
+                    <tr>
+                        <th>Bloque</th>
+                        <th>Horario</th>
+                        <th>Lunes</th>
+                        <th>Martes</th>
+                        <th>Miércoles</th>
+                        <th>Jueves</th>
+                        <th>Viernes</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <!-- Se llena dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal para registrar uso -->
+    <div id="modalRegistro" class="modal">
+        <div class="modal-content">
+            <h3>Registrar Uso de Sala</h3>
+            <form id="formRegistro">
+                <input type="hidden" id="bloqueSeleccionado">
+                <input type="hidden" id="fechaSeleccionada">
+                
+                <div class="form-group">
+                    <label for="inputCurso">Curso:</label>
+                    <input type="text" id="inputCurso" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inputProfesor">Profesor:</label>
+                    <input type="text" id="inputProfesor" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inputActividad">Actividad:</label>
+                    <textarea id="inputActividad"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inputObservaciones">Observaciones:</label>
+                    <textarea id="inputObservaciones"></textarea>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary">Guardar</button>
+                    <button type="button" onclick="cerrarModal()" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+</html>

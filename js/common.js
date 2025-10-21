@@ -1,6 +1,6 @@
 // Configuración de Supabase - REEMPLAZA CON TUS CREDENCIALES
-const supabaseUrl = window.env?.SUPABASE_URL; // || 'https://tu-proyecto.supabase.co';
-const supabaseKey = window.env?.SUPABASE_KEY; // || 'tu-anon-key';
+const supabaseUrl = 'https://iuspypmzrwzlqolbkjhl.supabase.co';
+const supabaseKey = 'eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1c3B5cG16cnd6bHFvbGJramhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1OTA5NDIsImV4cCI6MjA3NjE2Njk0Mn0';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // Funciones comunes para ambas versiones

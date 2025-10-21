@@ -1,23 +1,52 @@
-# Sistema de Registro de Sala Escolar (Testeo)
+# Sistema de Registro de Sala Completo
 
-Sistema web para gestionar el uso de salas en instituciones educativas.
+Sistema web para gestión de uso de salas educativas con dos interfaces:
+
+## Estructura del Proyecto
+
+- `index.html` - Página principal (selector de versión)
+- `admin.html` - Versión para administradores
+- `profesores.html` - Versión para profesores
 
 ## Características
-- Registro de bloques horarios de 45 minutos
-- Gestión semanal de reservas
-- Control de duplicados
-- Interfaz intuitiva
+
+### 👨‍💼 Administradores
+- Gestión completa de semanas
+- Crear, modificar y eliminar reservas
+- Editar notas de las semanas
+- Exportación de datos
+- Control total del sistema
+
+### 👩‍🏫 Profesores  
+- Solo lectura de semanas existentes
+- Registrar en bloques disponibles
+- Consulta de información
+- Sin capacidad de modificación
+
+## Configuración
+
+1. Reemplazar credenciales de Supabase en:
+   - `js/common.js` (líneas 2-3)
+
+2. Configurar la base de datos con las tablas:
+   - semanas
+   - bloques  
+   - reservas
+
+3. Desplegar en Netlify
+
+## URLs de Acceso
+
+- **Principal**: `https://tu-sitio.netlify.app`
+- **Admin**: `https://tu-sitio.netlify.app/admin.html`
+- **Profesores**: `https://tu-sitio.netlify.app/profesores.html`
 
 ## Tecnologías
+
 - HTML, CSS, JavaScript
 - Supabase (Base de datos)
 - Netlify (Hosting)
 
-## Configuración
-1. Clona el repositorio
-2. Configura Supabase con las tablas proporcionadas
-3. Reemplaza las credenciales en app.js
-4. Despliega en Netlify
+## Estructura de Base de Datos
 
-## Estructura de la base de datos
-Ver archivo `database-setup.sql` para crear las tablas.
+Ver scripts SQL en la documentación para crear las tablas necesarias.

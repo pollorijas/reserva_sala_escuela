@@ -3,127 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Sala Escolar</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Sistema de Registro de Sala</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .selector-version {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .descripcion {
+            color: #7f8c8d;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .botones-version {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .btn-version {
+            padding: 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+
+        .btn-admin {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-profesor {
+            background: linear-gradient(135deg, #27ae60, #219a52);
+            color: white;
+        }
+
+        .btn-version:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .caracteristicas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            text-align: left;
+            margin-top: 40px;
+        }
+
+        .caracteristica {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .caracteristica h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .caracteristica ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .caracteristica li {
+            padding: 5px 0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .caracteristica li:before {
+            content: "• ";
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .selector-version {
+                margin: 40px 20px;
+                padding: 20px;
+            }
+
+            .botones-version {
+                grid-template-columns: 1fr;
+            }
+
+            .caracteristicas {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📚 Registro de Uso de Sala</h1>
-        
-        <div class="semana-selector">
-            <label for="selectSemana">Seleccionar Semana:</label>
-            <select id="selectSemana">
-                <option value="">Cargando semanas...</option>
-            </select>
-            <button onclick="abrirModalNuevaSemana()" class="btn-primary">Nueva Semana</button>
-            <button onclick="exportarDatos()" class="btn-success">Exportar Datos</button>
+    <div class="selector-version">
+        <div class="logo">📚</div>
+        <h1>Sistema de Registro de Sala</h1>
+        <p class="descripcion">
+            Seleccione el modo de acceso según su perfil en la institución educativa
+        </p>
+
+        <div class="botones-version">
+            <a href="admin.html" class="btn-version btn-admin">
+                Acceso Administradores
+            </a>
+            <a href="profesores.html" class="btn-version btn-profesor">
+                Acceso Profesores
+            </a>
         </div>
 
-        <div class="info-semana" id="infoSemana">
-            <!-- Información de la semana actual -->
-        </div>
-
-        <div id="tabla-container">
-            <table class="tabla-horarios" id="tablaHorarios">
-                <thead>
-                    <tr>
-                        <th>Bloque</th>
-                        <th>Horario</th>
-                        <th>Lunes</th>
-                        <th>Martes</th>
-                        <th>Miércoles</th>
-                        <th>Jueves</th>
-                        <th>Viernes</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpoTabla">
-                    <!-- Se llena dinámicamente -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Modal para registrar uso -->
-    <div id="modalRegistro" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="cerrarModal()">&times;</span>
-            <h3 id="tituloModalRegistro">Registrar Uso de Sala</h3>
-            <form id="formRegistro">
-                <input type="hidden" id="bloqueSeleccionado">
-                <input type="hidden" id="fechaSeleccionada">
-                <input type="hidden" id="reservaId">
-                
-                <div class="form-group">
-                    <label for="inputCurso">Curso:</label>
-                    <input type="text" id="inputCurso" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="inputProfesor">Profesor:</label>
-                    <input type="text" id="inputProfesor" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="inputActividad">Actividad:</label>
-                    <textarea id="inputActividad"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="inputObservaciones">Observaciones:</label>
-                    <textarea id="inputObservaciones"></textarea>
-                </div>
-                
-                <div class="form-buttons">
-                    <button type="submit" class="btn-primary">Guardar</button>
-                    <button type="button" id="btnLiberar" class="btn-danger" style="display:none;">Liberar Bloque</button>
-                    <button type="button" onclick="cerrarModal()" class="btn-secondary">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para nueva semana -->
-    <div id="modalNuevaSemana" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="cerrarModalNuevaSemana()">&times;</span>
-            <h3>Crear Nueva Semana</h3>
-            <form id="formNuevaSemana">
-                <div class="form-group">
-                    <label for="inputFechaInicio">Fecha de Inicio (Lunes):</label>
-                    <input type="date" id="inputFechaInicio" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="inputNumeroSemana">Número de Semana:</label>
-                    <input type="number" id="inputNumeroSemana" min="1" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="inputNotas">Notas (opcional):</label>
-                    <textarea id="inputNotas" placeholder="Ej: Semana de exámenes parciales..."></textarea>
-                </div>
-                
-                <div class="form-buttons">
-                    <button type="submit" class="btn-primary">Crear Semana</button>
-                    <button type="button" onclick="cerrarModalNuevaSemana()" class="btn-secondary">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal de confirmación -->
-    <div id="modalConfirmacion" class="modal">
-        <div class="modal-content confirmacion">
-            <h3 id="tituloConfirmacion">Confirmar Acción</h3>
-            <p id="mensajeConfirmacion">¿Estás seguro de que deseas realizar esta acción?</p>
-            <div class="form-buttons">
-                <button id="btnConfirmarSi" class="btn-danger">Sí, confirmar</button>
-                <button onclick="cerrarModalConfirmacion()" class="btn-secondary">Cancelar</button>
+        <div class="caracteristicas">
+            <div class="caracteristica">
+                <h3>👨‍💼 Administradores</h3>
+                <ul>
+                    <li>Crear y gestionar semanas</li>
+                    <li>Modificar y liberar bloques</li>
+                    <li>Exportar datos</li>
+                    <li>Gestión completa del sistema</li>
+                </ul>
+            </div>
+            <div class="caracteristica">
+                <h3>👩‍🏫 Profesores</h3>
+                <ul>
+                    <li>Ver semanas existentes</li>
+                    <li>Registrar en bloques disponibles</li>
+                    <li>Consulta de información</li>
+                    <li>Acceso de solo lectura a reservas</li>
+                </ul>
             </div>
         </div>
-    </div>
 
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="app.js"></script>
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ecf0f1;">
+            <p style="color: #95a5a6; font-size: 12px;">
+                Sistema desarrollado para la gestión de uso de salas educativas
+            </p>
+        </div>
+    </div>
 </body>
 </html>

@@ -1,0 +1,220 @@
+body {
+    background: #f5f5f5;
+}
+
+.info-institucional {
+    background: #fff3cd;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+    margin-bottom: 20px;
+}
+
+.info-institucional p {
+    margin: 0;
+    color: #856404;
+    font-size: 14px;
+}
+
+.semana-selector {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.semana-selector label {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.semana-selector select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 300px;
+}
+
+.info-semana {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.tabla-horarios {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tabla-horarios th,
+.tabla-horarios td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+.tabla-horarios th {
+    background-color: #34495e;
+    color: white;
+    font-weight: bold;
+}
+
+.bloque-libre {
+    background-color: #d4edda;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.bloque-libre:hover {
+    background-color: #c3e6cb;
+    transform: scale(1.02);
+}
+
+.bloque-ocupado {
+    background-color: #fff3cd;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+}
+
+.bloque-ocupado:hover {
+    background-color: #ffeaa7;
+}
+
+.bloque-ocupado::after {
+    content: "✏️";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+}
+
+.bloque-ocupado .info-reserva {
+    font-size: 12px;
+    text-align: left;
+}
+
+.bloque-ocupado .curso {
+    font-weight: bold;
+    display: block;
+}
+
+.bloque-ocupado .profesor {
+    font-style: italic;
+    display: block;
+}
+
+.advertencia-admin {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 15px 0;
+    font-size: 13px;
+}
+
+.advertencia-admin p {
+    margin: 0;
+    color: #155724;
+}
+
+.info-reserva .info-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.info-reserva .info-item label {
+    font-weight: bold;
+    color: #495057;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.info-reserva .info-item span {
+    color: #212529;
+    display: block;
+    padding: 5px 0;
+}
+
+.notas-semana {
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.notas-semana strong {
+    color: #1976d2;
+}
+
+.sin-notas {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.con-notas {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.btn-editar-notas {
+    background-color: #17a2b8;
+    color: white;
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+.btn-editar-notas:hover {
+    background-color: #138496;
+}
+
+.info-semana-modal {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border-left: 4px solid #3498db;
+}
+
+.info-semana-modal h4 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+}
+
+.info-semana-modal p {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.helper-text {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.zona-horaria-info {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    padding: 5px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    text-align: center;
+}

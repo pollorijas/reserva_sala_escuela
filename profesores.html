@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Sala - Profesores</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/styles-profesores.css">
+    <link rel="stylesheet" href="css/mobile.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Registro de Sala - Acceso Profesores</h1>
+        
+        <div class="info-institucional">
+            <p><strong>Modo Profesor:</strong> Solo puede registrar bloques disponibles. No puede modificar o eliminar reservas existentes.</p>
+        </div>
+        
+        <div class="semana-selector">
+            <label for="selectSemana">Seleccionar Semana:</label>
+            <select id="selectSemana">
+                <option value="">Cargando semanas...</option>
+            </select>
+        </div>
+
+        <div class="info-semana" id="infoSemana">
+            <!-- Información de la semana actual -->
+        </div>
+
+        <div id="tabla-container">
+            <table class="tabla-horarios" id="tablaHorarios">
+                <thead>
+                    <tr>
+                        <th>Bloque</th>
+                        <th>Horario</th>
+                        <th>Lunes</th>
+                        <th>Martes</th>
+                        <th>Miércoles</th>
+                        <th>Jueves</th>
+                        <th>Viernes</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <!-- Se llena dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal para registrar uso (SOLO para bloques libres) -->
+    <div id="modalRegistro" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModal()">&times;</span>
+            <h3 id="tituloModalRegistro">Registrar Uso de Sala</h3>
+            <form id="formRegistro">
+                <input type="hidden" id="bloqueSeleccionado">
+                <input type="hidden" id="fechaSeleccionada">
+                
+                <div class="form-group">
+                    <label for="inputCurso">Curso:</label>
+                    <input type="text" id="inputCurso" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inputProfesor">Profesor:</label>
+                    <input type="text" id="inputProfesor" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inputActividad">Actividad:</label>
+                    <textarea id="inputActividad" placeholder="Describa la actividad a realizar..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inputObservaciones">Observaciones (opcional):</label>
+                    <textarea id="inputObservaciones" placeholder="Equipo necesario, materiales especiales, etc..."></textarea>
+                </div>
+                
+                <div class="advertencia-profesor">
+                    <p>⚠️ <strong>Nota:</strong> Una vez registrado, no podrá modificar o eliminar esta reserva. Contacte al administrador para cambios.</p>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary">Confirmar Reserva</button>
+                    <button type="button" onclick="cerrarModal()" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de solo lectura para bloques ocupados -->
+    <div id="modalSoloLectura" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalSoloLectura()">&times;</span>
+            <h3 id="tituloModalSoloLectura">Información de Reserva</h3>
+            <div class="info-reserva">
+                <div class="info-item">
+                    <label>Curso:</label>
+                    <span id="infoCurso"></span>
+                </div>
+                <div class="info-item">
+                    <label>Profesor:</label>
+                    <span id="infoProfesor"></span>
+                </div>
+                <div class="info-item">
+                    <label>Actividad:</label>
+                    <span id="infoActividad"></span>
+                </div>
+                <div class="info-item">
+                    <label>Observaciones:</label>
+                    <span id="infoObservaciones"></span>
+                </div>
+                <div class="info-item">
+                    <label>Fecha:</label>
+                    <span id="infoFecha"></span>
+                </div>
+                <div class="info-item">
+                    <label>Horario:</label>
+                    <span id="infoHorario"></span>
+                </div>
+            </div>
+            <div class="advertencia-profesor">
+                <p>ℹ️ <strong>Información de solo lectura.</strong> Contacte al administrador para modificaciones.</p>
+            </div>
+            <div class="form-buttons">
+                <button type="button" onclick="cerrarModalSoloLectura()" class="btn-secondary">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/common.js"></script>
+    <script src="js/app-profesores.js"></script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Sala - Administradores</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/styles-admin.css">
+    <link rel="stylesheet" href="css/mobile.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Registro de Sala - Acceso Administradores</h1>
+        
+        <div class="info-institucional">
+            <p><strong>Modo Administrador:</strong> Tiene control total sobre el sistema. Puede crear semanas, modificar y liberar bloques, y editar notas.</p>
+        </div>
+        
+        <div class="semana-selector">
+            <label for="selectSemana">Seleccionar Semana:</label>
+            <select id="selectSemana">
+                <option value="">Cargando semanas...</option>
+            </select>
+            <button onclick="abrirModalNuevaSemana()" class="btn-primary">Nueva Semana</button>
+            <button onclick="exportarDatos()" class="btn-success">Exportar Datos</button>
+        </div>
+
+        <div class="info-semana" id="infoSemana">
+            <!-- Información de la semana actual -->
+        </div>
+
+        <div id="tabla-container">
+            <table class="tabla-horarios" id="tablaHorarios">
+                <thead>
+                    <tr>
+                        <th>Bloque</th>
+                        <th>Horario</th>
+                        <th>Lunes</th>
+                        <th>Martes</th>
+                        <th>Miércoles</th>
+                        <th>Jueves</th>
+                        <th>Viernes</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <!-- Se llena dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal para registrar/editar uso -->
+    <div id="modalRegistro" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModal()">&times;</span>
+            <h3 id="tituloModalRegistro">Registrar Uso de Sala</h3>
+            <form id="formRegistro">
+                <input type="hidden" id="bloqueSeleccionado">
+                <input type="hidden" id="fechaSeleccionada">
+                <input type="hidden" id="reservaId">
+                
+                <div class="form-group">
+                    <label for="inputCurso">Curso:</label>
+                    <input type="text" id="inputCurso" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inputProfesor">Profesor:</label>
+                    <input type="text" id="inputProfesor" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inputActividad">Actividad:</label>
+                    <textarea id="inputActividad"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inputObservaciones">Observaciones:</label>
+                    <textarea id="inputObservaciones"></textarea>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary">Guardar</button>
+                    <button type="button" id="btnLiberar" class="btn-danger" style="display:none;">Liberar Bloque</button>
+                    <button type="button" onclick="cerrarModal()" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para nueva semana -->
+    <div id="modalNuevaSemana" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalNuevaSemana()">&times;</span>
+            <h3>Crear Nueva Semana</h3>
+            <form id="formNuevaSemana">
+                <div class="form-group">
+                    <label for="inputFechaInicio">Fecha de Inicio (Lunes):</label>
+                    <input type="date" id="inputFechaInicio" required>
+                    <div class="helper-text">
+                        Se seleccionará automáticamente el lunes de la semana
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inputNumeroSemana">Número de Semana:</label>
+                    <input type="number" id="inputNumeroSemana" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputNotas">Notas (opcional):</label>
+                    <textarea id="inputNotas" placeholder="Ej: Semana de exámenes parciales..."></textarea>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary">Crear Semana</button>
+                    <button type="button" onclick="cerrarModalNuevaSemana()" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para editar notas de semana -->
+    <div id="modalEditarNotas" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalEditarNotas()">&times;</span>
+            <h3>Editar Notas de la Semana</h3>
+            <form id="formEditarNotas">
+                <input type="hidden" id="semanaIdEditar">
+                
+                <div class="info-semana-modal">
+                    <h4 id="infoSemanaTitulo"></h4>
+                    <p id="infoSemanaFechas"></p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inputNotasEditar">Notas de la semana:</label>
+                    <textarea id="inputNotasEditar" placeholder="Ej: Semana de exámenes, feriados, eventos especiales, restricciones..." rows="6"></textarea>
+                    <div class="helper-text">
+                        Esta información será visible para todos los profesores
+                    </div>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary">Guardar Cambios</button>
+                    <button type="button" onclick="cerrarModalEditarNotas()" class="btn-secondary">Cancelar</button>
+                    <button type="button" id="btnEliminarNotas" class="btn-danger" style="display: none;">Eliminar Notas</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div id="modalConfirmacion" class="modal">
+        <div class="modal-content confirmacion">
+            <h3 id="tituloConfirmacion">Confirmar Acción</h3>
+            <p id="mensajeConfirmacion">¿Estás seguro de que deseas realizar esta acción?</p>
+            <div class="form-buttons">
+                <button id="btnConfirmarSi" class="btn-danger">Sí, confirmar</button>
+                <button onclick="cerrarModalConfirmacion()" class="btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/common.js"></script>
+    <script src="js/app-admin.js"></script>
+</body>
+</html>

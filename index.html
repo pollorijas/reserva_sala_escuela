@@ -15,7 +15,12 @@
             <select id="selectSemana">
                 <option value="">Cargando semanas...</option>
             </select>
-            <button onclick="crearNuevaSemana()">Nueva Semana</button>
+            <button onclick="abrirModalNuevaSemana()" class="btn-primary">Nueva Semana</button>
+            <button onclick="exportarDatos()" class="btn-success">Exportar Datos</button>
+        </div>
+
+        <div class="info-semana" id="infoSemana">
+            <!-- Información de la semana actual -->
         </div>
 
         <div id="tabla-container">
@@ -41,10 +46,12 @@
     <!-- Modal para registrar uso -->
     <div id="modalRegistro" class="modal">
         <div class="modal-content">
-            <h3>Registrar Uso de Sala</h3>
+            <span class="close" onclick="cerrarModal()">&times;</span>
+            <h3 id="tituloModalRegistro">Registrar Uso de Sala</h3>
             <form id="formRegistro">
                 <input type="hidden" id="bloqueSeleccionado">
                 <input type="hidden" id="fechaSeleccionada">
+                <input type="hidden" id="reservaId">
                 
                 <div class="form-group">
                     <label for="inputCurso">Curso:</label>
@@ -68,9 +75,51 @@
                 
                 <div class="form-buttons">
                     <button type="submit" class="btn-primary">Guardar</button>
+                    <button type="button" id="btnLiberar" class="btn-danger" style="display:none;">Liberar Bloque</button>
                     <button type="button" onclick="cerrarModal()" class="btn-secondary">Cancelar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal para nueva semana -->
+    <div id="modalNuevaSemana" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalNuevaSemana()">&times;</span>
+            <h3>Crear Nueva Semana</h3>
+            <form id="formNuevaSemana">
+                <div class="form-group">
+                    <label for="inputFechaInicio">Fecha de Inicio (Lunes):</label>
+                    <input type="date" id="inputFechaInicio" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inputNumeroSemana">Número de Semana:</label>
+                    <input type="number" id="inputNumeroSemana" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputNotas">Notas (opcional):</label>
+                    <textarea id="inputNotas" placeholder="Ej: Semana de exámenes parciales..."></textarea>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary">Crear Semana</button>
+                    <button type="button" onclick="cerrarModalNuevaSemana()" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div id="modalConfirmacion" class="modal">
+        <div class="modal-content confirmacion">
+            <h3 id="tituloConfirmacion">Confirmar Acción</h3>
+            <p id="mensajeConfirmacion">¿Estás seguro de que deseas realizar esta acción?</p>
+            <div class="form-buttons">
+                <button id="btnConfirmarSi" class="btn-danger">Sí, confirmar</button>
+                <button onclick="cerrarModalConfirmacion()" class="btn-secondary">Cancelar</button>
+            </div>
         </div>
     </div>
 

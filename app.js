@@ -7,12 +7,19 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 let semanaActual = null;
 let bloques = [];
 let reservas = [];
+let reservaSeleccionada = null;
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Inicializando aplicación...');
     await cargarBloques();
     await cargarSemanas();
+    
+    // Configurar evento del formulario de nueva semana
+    document.getElementById('formNuevaSemana').onsubmit = crearNuevaSemana;
+    
+    // Configurar evento del botón liberar
+    document.getElementById('btnLiberar').onclick = liberarBloque;
 });
 
 async function cargarBloques() {
@@ -91,6 +98,25 @@ async function cargarReservasSemana(semanaId) {
     reservas = data || [];
     console.log('Reservas cargadas:', reservas.length);
     await generarTablaHorarios();
+    actualizarInfoSemana();
+}
+
+function actualizarInfoSemana() {
+    const infoContainer = document.getElementById('infoSemana');
+    if (!semanaActual) {
+        infoContainer.innerHTML = '<p>No hay semana seleccionada</p>';
+        return;
+    }
+    
+    const reservasCount = reservas.length;
+    const bloquesTotales = 34; // 8 bloques x 4 días + 6 bloques viernes
+    
+    infoContainer.innerHTML = `
+        <h3>Semana ${semanaActual.numero_semana}</h3>
+        <p><strong>Período:</strong> ${formatearFecha(semanaActual.fecha_inicio)} - ${formatearFecha(semanaActual.fecha_fin)}</p>
+        <p><strong>Bloques ocupados:</strong> ${reservasCount} / ${bloquesTotales} (${Math.round(reservasCount/bloquesTotales*100)}%)</p>
+        ${semanaActual.notas ? `<p><strong>Notas:</strong> ${semanaActual.notas}</p>` : ''}
+    `;
 }
 
 async function generarTablaHorarios() {
@@ -146,13 +172,16 @@ async function generarTablaHorarios() {
                 );
                 
                 if (reservaExistente) {
-                    // Bloque ocupado
+                    // Bloque ocupado - hacer clickeable para editar
                     celdaDia.className = 'bloque-ocupado';
                     celdaDia.innerHTML = `
-                        <strong>${reservaExistente.curso}</strong><br>
-                        <small>${reservaExistente.profesor}</small>
+                        <div class="info-reserva">
+                            <span class="curso">${reservaExistente.curso}</span>
+                            <span class="profesor">${reservaExistente.profesor}</span>
+                        </div>
                     `;
-                    celdaDia.title = `Actividad: ${reservaExistente.actividad || 'Ninguna'}\nObservaciones: ${reservaExistente.observaciones || 'Ninguna'}`;
+                    celdaDia.title = `Click para editar o liberar\nActividad: ${reservaExistente.actividad || 'Ninguna'}\nObservaciones: ${reservaExistente.observaciones || 'Ninguna'}`;
+                    celdaDia.onclick = () => abrirModalEdicion(reservaExistente, bloqueId, dia, nombreDia);
                 } else {
                     // Bloque libre
                     celdaDia.className = 'bloque-libre';
@@ -181,30 +210,49 @@ function abrirModalRegistro(bloqueId, dia, nombreDia) {
     
     document.getElementById('bloqueSeleccionado').value = bloqueId;
     document.getElementById('fechaSeleccionada').value = fecha;
+    document.getElementById('reservaId').value = '';
     
-    // Actualizar título del modal
-    document.querySelector('.modal-content h3').textContent = 
+    // Configurar modal para nueva reserva
+    document.getElementById('tituloModalRegistro').textContent = 
         `Registrar Uso - ${nombreDia} Bloque ${bloque.numero_bloque} (${bloque.hora_inicio} - ${bloque.hora_fin})`;
+    
+    document.getElementById('btnLiberar').style.display = 'none';
+    document.getElementById('formRegistro').reset();
     
     document.getElementById('modalRegistro').style.display = 'block';
 }
 
-function calcularFecha(fechaInicio, dia) {
-    const fecha = new Date(fechaInicio);
-    fecha.setDate(fecha.getDate() + dia);
-    return fecha.toISOString().split('T')[0];
+function abrirModalEdicion(reserva, bloqueId, dia, nombreDia) {
+    if (!semanaActual) return;
+    
+    const bloque = bloques.find(b => b.id === bloqueId);
+    
+    document.getElementById('bloqueSeleccionado').value = bloqueId;
+    document.getElementById('fechaSeleccionada').value = reserva.fecha;
+    document.getElementById('reservaId').value = reserva.id;
+    
+    // Llenar formulario con datos existentes
+    document.getElementById('inputCurso').value = reserva.curso;
+    document.getElementById('inputProfesor').value = reserva.profesor;
+    document.getElementById('inputActividad').value = reserva.actividad || '';
+    document.getElementById('inputObservaciones').value = reserva.observaciones || '';
+    
+    // Configurar modal para edición
+    document.getElementById('tituloModalRegistro').textContent = 
+        `Editar Reserva - ${nombreDia} Bloque ${bloque.numero_bloque} (${bloque.hora_inicio} - ${bloque.hora_fin})`;
+    
+    document.getElementById('btnLiberar').style.display = 'inline-block';
+    
+    reservaSeleccionada = reserva;
+    document.getElementById('modalRegistro').style.display = 'block';
 }
 
-function formatearFecha(fechaString) {
-    const fecha = new Date(fechaString);
-    return fecha.toLocaleDateString('es-ES');
-}
-
-// Evento del formulario de registro
+// Evento del formulario de registro (nuevo y edición)
 document.getElementById('formRegistro').onsubmit = async function(e) {
     e.preventDefault();
     
-    const reserva = {
+    const reservaId = document.getElementById('reservaId').value;
+    const reservaData = {
         semana_id: semanaActual.id,
         bloque_id: parseInt(document.getElementById('bloqueSeleccionado').value),
         curso: document.getElementById('inputCurso').value.trim(),
@@ -214,11 +262,22 @@ document.getElementById('formRegistro').onsubmit = async function(e) {
         fecha: document.getElementById('fechaSeleccionada').value
     };
     
-    console.log('Guardando reserva:', reserva);
+    let error;
     
-    const { error } = await supabase
-        .from('reservas')
-        .insert([reserva]);
+    if (reservaId) {
+        // Actualizar reserva existente
+        console.log('Actualizando reserva:', reservaId, reservaData);
+        ({ error } = await supabase
+            .from('reservas')
+            .update(reservaData)
+            .eq('id', reservaId));
+    } else {
+        // Crear nueva reserva
+        console.log('Creando nueva reserva:', reservaData);
+        ({ error } = await supabase
+            .from('reservas')
+            .insert([reservaData]));
+    }
     
     if (error) {
         console.error('Error guardando reserva:', error);
@@ -226,49 +285,198 @@ document.getElementById('formRegistro').onsubmit = async function(e) {
     } else {
         cerrarModal();
         await cargarReservasSemana(semanaActual.id);
-        alert('✅ Registro guardado exitosamente');
+        alert(reservaId ? '✅ Reserva actualizada exitosamente' : '✅ Registro guardado exitosamente');
     }
 };
 
-function cerrarModal() {
-    document.getElementById('modalRegistro').style.display = 'none';
-    document.getElementById('formRegistro').reset();
+async function liberarBloque() {
+    const reservaId = document.getElementById('reservaId').value;
+    
+    if (!reservaId) {
+        alert('No hay reserva seleccionada para liberar');
+        return;
+    }
+    
+    // Mostrar confirmación
+    abrirModalConfirmacion(
+        'Liberar Bloque',
+        '¿Estás seguro de que deseas liberar este bloque? Esta acción no se puede deshacer.',
+        async () => {
+            console.log('Eliminando reserva:', reservaId);
+            const { error } = await supabase
+                .from('reservas')
+                .delete()
+                .eq('id', reservaId);
+            
+            if (error) {
+                console.error('Error eliminando reserva:', error);
+                alert('Error al liberar bloque: ' + error.message);
+            } else {
+                cerrarModal();
+                await cargarReservasSemana(semanaActual.id);
+                alert('✅ Bloque liberado exitosamente');
+            }
+        }
+    );
 }
 
-// Función para crear nueva semana
-async function crearNuevaSemana() {
-    const fechaInicio = prompt('Ingresa la fecha de inicio (YYYY-MM-DD):');
-    if (!fechaInicio) return;
+// Modal para nueva semana
+function abrirModalNuevaSemana() {
+    // Establecer fecha predeterminada (próximo lunes)
+    const hoy = new Date();
+    const proximoLunes = new Date(hoy);
+    proximoLunes.setDate(hoy.getDate() + (1 - hoy.getDay() + 7) % 7);
+    
+    document.getElementById('inputFechaInicio').value = proximoLunes.toISOString().split('T')[0];
+    
+    // Calcular número de semana automáticamente
+    const numeroSemana = Math.ceil((proximoLunes - new Date(proximoLunes.getFullYear(), 0, 1)) / (7 * 24 * 60 * 60 * 1000));
+    document.getElementById('inputNumeroSemana').value = numeroSemana;
+    
+    document.getElementById('modalNuevaSemana').style.display = 'block';
+}
+
+async function crearNuevaSemana(e) {
+    e.preventDefault();
+    
+    const fechaInicio = document.getElementById('inputFechaInicio').value;
+    const numeroSemana = parseInt(document.getElementById('inputNumeroSemana').value);
+    const notas = document.getElementById('inputNotas').value.trim();
+    
+    if (!fechaInicio || !numeroSemana) {
+        alert('Por favor completa todos los campos requeridos');
+        return;
+    }
     
     const fechaInicioObj = new Date(fechaInicio);
     const fechaFinObj = new Date(fechaInicioObj);
     fechaFinObj.setDate(fechaFinObj.getDate() + 4); // +4 días para el viernes
     
-    const numeroSemana = prompt('Ingresa el número de semana:');
-    if (!numeroSemana) return;
-    
     const nuevaSemana = {
         fecha_inicio: fechaInicio,
         fecha_fin: fechaFinObj.toISOString().split('T')[0],
-        numero_semana: parseInt(numeroSemana)
+        numero_semana: numeroSemana,
+        notas: notas || null
     };
+    
+    console.log('Creando nueva semana:', nuevaSemana);
     
     const { error } = await supabase
         .from('semanas')
         .insert([nuevaSemana]);
     
     if (error) {
+        console.error('Error creando semana:', error);
         alert('Error creando semana: ' + error.message);
     } else {
-        alert('Semana creada exitosamente');
+        cerrarModalNuevaSemana();
         await cargarSemanas();
+        alert('✅ Semana creada exitosamente');
     }
 }
 
-// Cerrar modal al hacer click fuera
+// Sistema de confirmación
+function abrirModalConfirmacion(titulo, mensaje, callback) {
+    document.getElementById('tituloConfirmacion').textContent = titulo;
+    document.getElementById('mensajeConfirmacion').textContent = mensaje;
+    
+    const btnConfirmar = document.getElementById('btnConfirmarSi');
+    btnConfirmar.onclick = callback;
+    
+    document.getElementById('modalConfirmacion').style.display = 'block';
+}
+
+// Funciones auxiliares
+function calcularFecha(fechaInicio, dia) {
+    const fecha = new Date(fechaInicio);
+    fecha.setDate(fecha.getDate() + dia);
+    return fecha.toISOString().split('T')[0];
+}
+
+function formatearFecha(fechaString) {
+    const fecha = new Date(fechaInicio);
+    return fecha.toLocaleDateString('es-ES');
+}
+
+function formatearFecha(fechaString) {
+    const fecha = new Date(fechaString);
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    };
+    return fecha.toLocaleDateString('es-ES', options);
+}
+
+// Funciones para cerrar modales
+function cerrarModal() {
+    document.getElementById('modalRegistro').style.display = 'none';
+    document.getElementById('formRegistro').reset();
+    reservaSeleccionada = null;
+}
+
+function cerrarModalNuevaSemana() {
+    document.getElementById('modalNuevaSemana').style.display = 'none';
+    document.getElementById('formNuevaSemana').reset();
+}
+
+function cerrarModalConfirmacion() {
+    document.getElementById('modalConfirmacion').style.display = 'none';
+}
+
+// Cerrar modales al hacer click fuera
 window.onclick = function(event) {
-    const modal = document.getElementById('modalRegistro');
-    if (event.target === modal) {
-        cerrarModal();
+    const modals = ['modalRegistro', 'modalNuevaSemana', 'modalConfirmacion'];
+    modals.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (event.target === modal) {
+            if (modalId === 'modalRegistro') cerrarModal();
+            if (modalId === 'modalNuevaSemana') cerrarModalNuevaSemana();
+            if (modalId === 'modalConfirmacion') cerrarModalConfirmacion();
+        }
+    });
+}
+
+// Función para exportar datos
+async function exportarDatos() {
+    if (!semanaActual) {
+        alert('Primero selecciona una semana');
+        return;
     }
-};
+    
+    // Obtener todas las reservas de la semana con información de bloques
+    const { data: reservasCompletas, error } = await supabase
+        .from('reservas')
+        .select(`
+            *,
+            bloques (*)
+        `)
+        .eq('semana_id', semanaActual.id);
+    
+    if (error) {
+        alert('Error al exportar datos: ' + error.message);
+        return;
+    }
+    
+    // Crear CSV
+    let csv = 'Día,Fecha,Bloque,Horario,Curso,Profesor,Actividad,Observaciones\n';
+    
+    reservasCompletas.forEach(reserva => {
+        const fecha = new Date(reserva.fecha);
+        const diaSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][fecha.getDay()];
+        
+        csv += `"${diaSemana}","${reserva.fecha}","${reserva.bloques.numero_bloque}","${reserva.bloques.hora_inicio} - ${reserva.bloques.hora_fin}","${reserva.curso}","${reserva.profesor}","${reserva.actividad || ''}","${reserva.observaciones || ''}"\n`;
+    });
+    
+    // Descargar archivo
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `reservas_semana_${semanaActual.numero_semana}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}

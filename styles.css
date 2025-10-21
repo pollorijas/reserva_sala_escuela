@@ -12,7 +12,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -32,10 +32,12 @@ h1 {
     display: flex;
     align-items: center;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
 .semana-selector label {
     font-weight: bold;
+    white-space: nowrap;
 }
 
 .semana-selector select {
@@ -51,10 +53,12 @@ button {
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
+    transition: all 0.3s ease;
 }
 
 button:hover {
     opacity: 0.9;
+    transform: translateY(-1px);
 }
 
 .btn-primary {
@@ -65,6 +69,39 @@ button:hover {
 .btn-secondary {
     background-color: #95a5a6;
     color: white;
+}
+
+.btn-success {
+    background-color: #27ae60;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-warning {
+    background-color: #f39c12;
+    color: white;
+}
+
+.info-semana {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.info-semana h3 {
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.info-semana p {
+    color: #7f8c8d;
+    margin-bottom: 3px;
 }
 
 .tabla-horarios {
@@ -100,8 +137,37 @@ button:hover {
 }
 
 .bloque-ocupado {
-    background-color: #f8d7da;
-    cursor: not-allowed;
+    background-color: #fff3cd;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+}
+
+.bloque-ocupado:hover {
+    background-color: #ffeaa7;
+}
+
+.bloque-ocupado::after {
+    content: "✏️";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+}
+
+.bloque-ocupado .info-reserva {
+    font-size: 12px;
+    text-align: left;
+}
+
+.bloque-ocupado .curso {
+    font-weight: bold;
+    display: block;
+}
+
+.bloque-ocupado .profesor {
+    font-style: italic;
+    display: block;
 }
 
 .modal {
@@ -113,6 +179,7 @@ button:hover {
     height: 100%;
     background-color: rgba(0,0,0,0.5);
     z-index: 1000;
+    animation: fadeIn 0.3s;
 }
 
 .modal-content {
@@ -125,6 +192,28 @@ button:hover {
     border-radius: 8px;
     min-width: 400px;
     max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideIn 0.3s;
+}
+
+.modal-content.confirmacion {
+    min-width: 300px;
+    text-align: center;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #7f8c8d;
+}
+
+.close:hover {
+    color: #34495e;
 }
 
 .form-group {
@@ -144,6 +233,13 @@ button:hover {
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #3498db;
+    outline: none;
 }
 
 .form-group textarea {
@@ -156,4 +252,67 @@ button:hover {
     gap: 10px;
     justify-content: flex-end;
     margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.acciones-rapidas {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.btn-small {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    to { 
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .semana-selector {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .semana-selector select {
+        min-width: auto;
+    }
+    
+    .form-buttons {
+        justify-content: stretch;
+    }
+    
+    .form-buttons button {
+        flex: 1;
+    }
+    
+    .modal-content {
+        min-width: 90%;
+        padding: 20px;
+    }
+    
+    .tabla-horarios {
+        font-size: 12px;
+    }
+    
+    .tabla-horarios th,
+    .tabla-horarios td {
+        padding: 6px;
+    }
 }

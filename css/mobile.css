@@ -154,75 +154,61 @@
         font-size: 13px;
     }
 }
-
-/* En mobile.css - Agregar estilos responsive para la nueva info-semana */
+/* En mobile.css - Solo ajustes específicos para móvil */
 @media (max-width: 768px) {
     .info-semana {
-        padding: 20px 15px;
-    }
-    
-    .info-semana-header {
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .info-semana-titulo h3 {
-        font-size: 1.5rem;
-        text-align: center;
-    }
-    
-    .info-semana-titulo p {
-        text-align: center;
-    }
-    
-    .info-semana-estadisticas {
-        width: 100%;
-        text-align: center;
-    }
-    
-    .porcentaje-ocupacion {
-        font-size: 1.8rem;
-    }
-    
-    .info-semana-detalles {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-    
-    .detalle-card {
-        text-align: center;
-        padding: 12px;
-    }
-    
-    .notas-semana-container {
         padding: 15px;
     }
     
-    .notas-semana-titulo {
-        justify-content: center;
-        text-align: center;
+    .info-semana-header {
+        gap: 12px;
+    }
+    
+    .info-semana-titulo h3 {
+        font-size: 1.1rem;
+    }
+    
+    .info-semana-titulo p {
+        font-size: 0.9rem;
+    }
+    
+    .porcentaje-ocupacion {
+        font-size: 1.3rem;
+    }
+    
+    .info-semana-detalles {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .detalle-card {
+        padding: 8px;
+    }
+    
+    .detalle-card .valor {
+        font-size: 0.95rem;
+    }
+    
+    .detalle-card .etiqueta {
+        font-size: 0.75rem;
+    }
+    
+    .notas-semana-container {
+        padding: 12px;
     }
     
     .info-semana.admin .btn-editar-notas {
         width: 100%;
-        margin-top: 10px;
+        margin-top: 8px;
     }
 }
 
 @media (max-width: 480px) {
-    .info-semana {
-        padding: 15px 10px;
+    .info-semana-detalles {
+        grid-template-columns: 1fr;
     }
     
-    .info-semana-titulo h3 {
-        font-size: 1.3rem;
-    }
-    
-    .detalle-card .valor {
-        font-size: 1.1rem;
-    }
-    
-    .notas-semana-container {
-        padding: 12px;
+    .detalles-estadistica {
+        grid-template-columns: 1fr 1fr;
     }
 }

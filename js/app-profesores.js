@@ -97,7 +97,7 @@ async function cargarReservasSemana(semanaId) {
     actualizarInfoSemana();
 }
 
-// En app-profesores.js - REEMPLAZAR la función actualizarInfoSemana
+// En app-profesores.js - REEMPLAZAR la función actualizarInfoSemana con versión corregida
 function actualizarInfoSemana() {
     const infoContainer = document.getElementById('infoSemana');
     if (!semanaActual) {
@@ -110,12 +110,8 @@ function actualizarInfoSemana() {
     const porcentajeOcupacion = Math.round(reservasCount/bloquesTotales*100);
     const bloquesDisponibles = bloquesTotales - reservasCount;
     
-    // Calcular días con más ocupación
+    // Calcular estadísticas básicas
     const ocupacionPorDia = calcularOcupacionPorDia();
-    
-    // Determinar color del porcentaje según la ocupación
-    const colorPorcentaje = porcentajeOcupacion > 80 ? '#ff6b6b' : 
-                           porcentajeOcupacion > 50 ? '#feca57' : '#1dd1a1';
     
     infoContainer.innerHTML = `
         <div class="info-semana">
@@ -127,8 +123,8 @@ function actualizarInfoSemana() {
                 
                 <div class="info-semana-estadisticas">
                     <div class="estadistica-principal">
-                        <span class="porcentaje-ocupacion" style="color: ${colorPorcentaje}">${porcentajeOcupacion}%</span>
-                        <span class="texto-estadistica">de ocupación</span>
+                        <span class="porcentaje-ocupacion">${porcentajeOcupacion}%</span>
+                        <span class="texto-estadistica">ocupación</span>
                     </div>
                     <div class="detalles-estadistica">
                         <div class="detalle-item">
@@ -137,7 +133,7 @@ function actualizarInfoSemana() {
                         </div>
                         <div class="detalle-item">
                             <strong>${bloquesDisponibles}</strong>
-                            <div>disponibles</div>
+                            <div>libres</div>
                         </div>
                     </div>
                 </div>
@@ -145,9 +141,9 @@ function actualizarInfoSemana() {
             
             <div class="info-semana-detalles">
                 <div class="detalle-card">
-                    <span class="icono">🕒</span>
+                    <span class="icono">📋</span>
                     <span class="valor">${bloquesTotales}</span>
-                    <span class="etiqueta">Bloques totales</span>
+                    <span class="etiqueta">Total bloques</span>
                 </div>
                 <div class="detalle-card">
                     <span class="icono">📊</span>
@@ -157,33 +153,33 @@ function actualizarInfoSemana() {
                 <div class="detalle-card">
                     <span class="icono">📈</span>
                     <span class="valor">${ocupacionPorDia.maxOcupacion.porcentaje}%</span>
-                    <span class="etiqueta">Máxima ocupación</span>
+                    <span class="etiqueta">Máx. ocupación</span>
                 </div>
             </div>
             
-            <!-- NOTAS DE LA SEMANA - RESALTADAS -->
+            <!-- NOTAS DE LA SEMANA - DESTACADAS PERO SOBRIAS -->
             <div class="notas-semana-container ${!semanaActual.notas ? 'sin-notas' : ''}">
                 <div class="notas-semana-titulo">
                     <span class="icono">📌</span>
-                    <span>Información importante de la semana</span>
+                    <span>Información importante</span>
                 </div>
                 <div class="notas-semana-contenido">
-                    ${semanaActual.notas ? semanaActual.notas : 'No hay notas específicas para esta semana. Horarios regulares.'}
+                    ${semanaActual.notas ? semanaActual.notas : ''}
                 </div>
             </div>
             
             <div class="estado-sistema">
-                ✅ Modo profesor activo - Solo puede registrar en bloques disponibles
+                ✅ Modo profesor - Solo puede registrar en bloques disponibles
             </div>
             
             <div class="zona-horaria-info">
-                📍 Zona horaria: Chile (UTC-3) - ${new Date().toLocaleDateString('es-CL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                📍 Chile - ${new Date().toLocaleDateString('es-CL')}
             </div>
         </div>
     `;
 }
 
-// Función auxiliar para calcular ocupación por día
+// Mantener la función calcularOcupacionPorDia igual que antes
 function calcularOcupacionPorDia() {
     const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
     const bloquesPorDia = { 'Lunes': 8, 'Martes': 8, 'Miércoles': 8, 'Jueves': 8, 'Viernes': 6 };
@@ -195,7 +191,6 @@ function calcularOcupacionPorDia() {
         const bloquesDia = bloquesPorDia[dia];
         let ocupadosDia = 0;
         
-        // Contar reservas para este día
         for (let bloqueNum = 1; bloqueNum <= bloquesDia; bloqueNum++) {
             const bloqueId = dia === 'Viernes' ? 
                 bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Viernes')?.id :

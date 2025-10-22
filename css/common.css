@@ -217,222 +217,251 @@ button:hover {
     }
 }
 
-/* Estilos mejorados para la información de la semana */
+/* Estilos corregidos para la información de la semana - MÁS SOBRIO */
 .info-semana {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    margin-bottom: 25px;
-    position: relative;
-    overflow: hidden;
-}
-
-.info-semana::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+    background: white;
+    color: #333;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    border-left: 4px solid #3498db;
 }
 
 .info-semana-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
+    align-items: center;
+    margin-bottom: 15px;
     flex-wrap: wrap;
     gap: 15px;
 }
 
-.info-semana-titulo {
-    flex: 1;
-    min-width: 250px;
-}
-
 .info-semana-titulo h3 {
-    font-size: 1.8rem;
+    font-size: 1.3rem;
     margin: 0 0 5px 0;
-    color: white;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    color: #2c3e50;
 }
 
 .info-semana-titulo p {
     margin: 0;
-    opacity: 0.9;
-    font-size: 1.1rem;
+    color: #7f8c8d;
+    font-size: 0.95rem;
 }
 
 .info-semana-estadisticas {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    padding: 15px;
-    border-radius: 8px;
-    min-width: 200px;
+    background: #f8f9fa;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    min-width: 150px;
 }
 
 .estadistica-principal {
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .porcentaje-ocupacion {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: bold;
     display: block;
     line-height: 1;
 }
 
 .texto-estadistica {
-    font-size: 0.9rem;
-    opacity: 0.9;
+    font-size: 0.85rem;
+    color: #6c757d;
 }
 
 .detalles-estadistica {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    font-size: 0.85rem;
+    gap: 6px;
+    font-size: 0.8rem;
 }
 
 .detalle-item {
     text-align: center;
-    padding: 5px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    padding: 4px;
+    background: white;
+    border-radius: 3px;
+    border: 1px solid #e9ecef;
+}
+
+.detalle-item strong {
+    color: #2c3e50;
 }
 
 .info-semana-detalles {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 15px;
 }
 
 .detalle-card {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 15px;
-    border-radius: 8px;
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    text-align: center;
 }
 
 .detalle-card .icono {
-    font-size: 1.5rem;
-    margin-bottom: 8px;
+    font-size: 1.2rem;
+    margin-bottom: 6px;
     display: block;
 }
 
 .detalle-card .valor {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: bold;
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
+    color: #2c3e50;
 }
 
 .detalle-card .etiqueta {
-    font-size: 0.85rem;
-    opacity: 0.9;
+    font-size: 0.8rem;
+    color: #6c757d;
 }
 
-/* Estilos mejorados para notas */
+/* Estilos mejorados para notas - MÁS DESTACADO PERO SOBRIO */
 .notas-semana-container {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    padding: 20px;
-    border-radius: 8px;
-    border-left: 4px solid #feca57;
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    padding: 15px;
+    border-radius: 6px;
     margin-top: 15px;
+    border-left: 4px solid #f39c12;
 }
 
 .notas-semana-container.sin-notas {
-    border-left-color: rgba(255, 255, 255, 0.3);
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-left: 4px solid #95a5a6;
     opacity: 0.8;
 }
 
 .notas-semana-titulo {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 8px;
+    margin-bottom: 8px;
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
+    color: #856404;
+}
+
+.notas-semana-container.sin-notas .notas-semana-titulo {
+    color: #6c757d;
 }
 
 .notas-semana-titulo .icono {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
 }
 
 .notas-semana-contenido {
-    line-height: 1.5;
-    font-size: 0.95rem;
+    line-height: 1.4;
+    font-size: 0.9rem;
+    color: #333;
 }
 
 .notas-semana-contenido:empty::before {
-    content: "No hay notas para esta semana";
+    content: "No hay notas específicas para esta semana. Horarios regulares.";
     opacity: 0.8;
     font-style: italic;
+    color: #6c757d;
 }
 
 /* Estados del sistema */
 .estado-sistema {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 12px 15px;
-    border-radius: 6px;
-    margin-top: 15px;
+    background: #e8f5e8;
+    padding: 10px 12px;
+    border-radius: 4px;
+    margin-top: 12px;
     text-align: center;
-    font-size: 0.9rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 0.85rem;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
 }
 
 /* Zona horaria */
 .zona-horaria-info {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 8px 12px;
+    background: #f8f9fa;
+    padding: 6px 10px;
     border-radius: 4px;
-    margin-top: 10px;
-    font-size: 0.8rem;
+    margin-top: 8px;
+    font-size: 0.75rem;
     text-align: center;
-    opacity: 0.8;
+    color: #6c757d;
+    border: 1px solid #e9ecef;
 }
 
 /* Versión específica para administradores */
+.info-semana.admin {
+    border-left-color: #e74c3c;
+}
+
 .info-semana.admin .btn-editar-notas {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #3498db;
+    border: none;
     color: white;
-    padding: 10px 20px;
-    border-radius: 6px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.85rem;
     transition: all 0.3s ease;
 }
 
 .info-semana.admin .btn-editar-notas:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
+    background: #2980b9;
+    transform: translateY(-1px);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
     .info-semana-header {
         flex-direction: column;
+        align-items: stretch;
     }
     
     .info-semana-titulo h3 {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
+        text-align: left;
+    }
+    
+    .info-semana-titulo p {
+        text-align: left;
+    }
+    
+    .info-semana-estadisticas {
+        width: 100%;
+    }
+    
+    .info-semana-detalles {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .detalle-card {
+        padding: 10px;
+    }
+    
+    .detalle-card .valor {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-semana {
+        padding: 15px;
     }
     
     .info-semana-detalles {
         grid-template-columns: 1fr;
     }
     
-    .detalle-card {
-        text-align: center;
-    }
-    
-    .info-semana-estadisticas {
-        width: 100%;
+    .notas-semana-container {
+        padding: 12px;
     }
 }

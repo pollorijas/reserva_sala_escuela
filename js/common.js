@@ -1,6 +1,6 @@
 // Configuración de Supabase - REEMPLAZA CON TUS CREDENCIALES
 const supabaseUrl = 'https://iuspypmzrwzlqolbkjhl.supabase.co';
-const supabaseKey = 'eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1c3B5cG16cnd6bHFvbGJramhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1OTA5NDIsImV4cCI6MjA3NjE2Njk0Mn0';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1c3B5cG16cnd6bHFvbGJramhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1OTA5NDIsImV4cCI6MjA3NjE2Njk0Mn0.da86H7bm7lZ5T66qaNyjl1iflQ1xN-iy_5wanhdLzHE';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // Funciones comunes para ambas versiones

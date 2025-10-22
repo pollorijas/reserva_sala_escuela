@@ -226,7 +226,7 @@ async function generarTablaHorarios() {
 }
 
 // Abrir modal para registro nuevo
-function abrirModalRegistro(bloqueId, dia, nombreDia) {
+/*function abrirModalRegistro(bloqueId, dia, nombreDia) {
     if (!semanaActual) return;
     
     const fecha = calcularFecha(semanaActual.fecha_inicio, dia);
@@ -258,6 +258,60 @@ function abrirModalEdicion(reserva, bloqueId, dia, nombreDia) {
     
     // Llenar formulario con datos existentes
     document.getElementById('inputCurso').value = reserva.curso;
+    document.getElementById('inputProfesor').value = reserva.profesor;
+    document.getElementById('inputActividad').value = reserva.actividad || '';
+    document.getElementById('inputObservaciones').value = reserva.observaciones || '';
+    
+    // Configurar modal para edición
+    document.getElementById('tituloModalRegistro').textContent = 
+        `Editar Reserva - ${nombreDia} Bloque ${bloque.numero_bloque} (${bloque.hora_inicio} - ${bloque.hora_fin})`;
+    
+    document.getElementById('btnLiberar').style.display = 'inline-block';
+    
+    reservaSeleccionada = reserva;
+    document.getElementById('modalRegistro').style.display = 'block';
+}*/
+
+// En app-admin.js - MODIFICAR la función abrirModalRegistro
+function abrirModalRegistro(bloqueId, dia, nombreDia) {
+    if (!semanaActual) return;
+    
+    const fecha = calcularFecha(semanaActual.fecha_inicio, dia);
+    const bloque = bloques.find(b => b.id === bloqueId);
+    
+    document.getElementById('bloqueSeleccionado').value = bloqueId;
+    document.getElementById('fechaSeleccionada').value = fecha;
+    document.getElementById('reservaId').value = '';
+    
+    // Configurar modal para nueva reserva
+    document.getElementById('tituloModalRegistro').textContent = 
+        `Registrar Uso - ${nombreDia} Bloque ${bloque.numero_bloque} (${bloque.hora_inicio} - ${bloque.hora_fin})`;
+    
+    document.getElementById('btnLiberar').style.display = 'none';
+    document.getElementById('formRegistro').reset();
+    
+    // CARGAR CURSOS EN EL SELECT
+    const selectCurso = document.getElementById('inputCurso');
+    cargarCursosEnSelect(selectCurso);
+    
+    document.getElementById('modalRegistro').style.display = 'block';
+}
+
+// MODIFICAR la función abrirModalEdicion
+function abrirModalEdicion(reserva, bloqueId, dia, nombreDia) {
+    if (!semanaActual) return;
+    
+    const bloque = bloques.find(b => b.id === bloqueId);
+    
+    document.getElementById('bloqueSeleccionado').value = bloqueId;
+    document.getElementById('fechaSeleccionada').value = reserva.fecha;
+    document.getElementById('reservaId').value = reserva.id;
+    
+    // CARGAR CURSOS EN EL SELECT CON EL CURSO ACTUAL SELECCIONADO
+    const selectCurso = document.getElementById('inputCurso');
+    cargarCursosEnSelect(selectCurso, reserva.curso);
+    
+    // Llenar los otros campos (mantener existente)
     document.getElementById('inputProfesor').value = reserva.profesor;
     document.getElementById('inputActividad').value = reserva.actividad || '';
     document.getElementById('inputObservaciones').value = reserva.observaciones || '';
@@ -1010,14 +1064,14 @@ function generarTablaProfesionalPDF(doc, reservas, startX, startY, width) {
                 doc.roundedRect(x, currentY, colWidth, rowHeight, 2, 2, 'F');
                 
                 // Texto para bloque ocupado
-                doc.setFontSize(7);
+                doc.setFontSize(8);
                 doc.setFont('helvetica', 'bold');
                 doc.text(truncarTexto(reserva.curso, 12), x + 3, currentY + 3);
                 doc.setFont('helvetica', 'normal');
-                doc.text(truncarTexto(reserva.profesor, 12), x + 3, currentY + 5.5);
+                doc.text(truncarTexto(reserva.profesor, 30), x + 3, currentY + 5.5);
                 
                 if (reserva.actividad) {
-                    doc.setFontSize(6);
+                    doc.setFontSize(7);
                     doc.text(truncarTexto(reserva.actividad, 15), x + 3, currentY + 7.5);
                 }
             } else {

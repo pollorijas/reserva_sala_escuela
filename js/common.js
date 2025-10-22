@@ -152,3 +152,70 @@ document.addEventListener('DOMContentLoaded', function() {
         viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
     }
 });
+
+// En common.js - ACTUALIZAR la inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    manejarResponsive();
+    optimizarParaMovil();
+    window.addEventListener('resize', manejarResponsive);
+    
+    // INICIALIZAR SELECTS DE CURSOS
+    inicializarSelectsCursos();
+    
+    // Prevenir zoom en inputs (iOS)
+    let viewport = document.querySelector("meta[name=viewport]");
+    if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+    }
+});
+
+// Generar lista de cursos de 1° a 8° básico con letras A, B
+function generarOpcionesCursos() {
+    const cursos = [];
+    const letras = ['A', 'B'];
+    
+    for (let nivel = 1; nivel <= 8; nivel++) {
+        letras.forEach(letra => {
+            cursos.push({
+                valor: `${nivel}° Básico ${letra}`,
+                texto: `${nivel}° Básico ${letra}`
+            });
+        });
+    }
+    
+    return cursos;
+}
+
+// Cargar cursos en un elemento select
+function cargarCursosEnSelect(selectElement, cursoSeleccionado = '') {
+    const cursos = generarOpcionesCursos();
+    
+    // Limpiar select
+    selectElement.innerHTML = '<option value="">Seleccione un curso</option>';
+    
+    // Agregar opciones
+    cursos.forEach(curso => {
+        const option = document.createElement('option');
+        option.value = curso.valor;
+        option.textContent = curso.texto;
+        
+        // Seleccionar si coincide con el curso actual
+        if (cursoSeleccionado && curso.valor === cursoSeleccionado) {
+            option.selected = true;
+        }
+        
+        selectElement.appendChild(option);
+    });
+}
+
+// Función para inicializar selects de cursos en la página
+function inicializarSelectsCursos() {
+    const selectsCurso = document.querySelectorAll('#inputCurso, #inputCursoEditar');
+    
+    selectsCurso.forEach(select => {
+        if (select && !select.hasAttribute('data-inicializado')) {
+            cargarCursosEnSelect(select);
+            select.setAttribute('data-inicializado', 'true');
+        }
+    });
+}

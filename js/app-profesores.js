@@ -216,6 +216,25 @@ async function generarTablaHorarios() {
 }
 
 // Abrir modal para registro
+/*function abrirModalRegistro(bloqueId, dia, nombreDia) {
+    if (!semanaActual) return;
+    
+    const fecha = calcularFecha(semanaActual.fecha_inicio, dia);
+    const bloque = bloques.find(b => b.id === bloqueId);
+    
+    document.getElementById('bloqueSeleccionado').value = bloqueId;
+    document.getElementById('fechaSeleccionada').value = fecha;
+    
+    // Configurar modal para nueva reserva
+    document.getElementById('tituloModalRegistro').textContent = 
+        `Registrar Uso - ${nombreDia} Bloque ${bloque.numero_bloque} (${bloque.hora_inicio} - ${bloque.hora_fin})`;
+    
+    document.getElementById('formRegistro').reset();
+    
+    document.getElementById('modalRegistro').style.display = 'block';
+}*/
+
+// En app-profesores.js - MODIFICAR la función abrirModalRegistro
 function abrirModalRegistro(bloqueId, dia, nombreDia) {
     if (!semanaActual) return;
     
@@ -230,6 +249,10 @@ function abrirModalRegistro(bloqueId, dia, nombreDia) {
         `Registrar Uso - ${nombreDia} Bloque ${bloque.numero_bloque} (${bloque.hora_inicio} - ${bloque.hora_fin})`;
     
     document.getElementById('formRegistro').reset();
+    
+    // CARGAR CURSOS EN EL SELECT
+    const selectCurso = document.getElementById('inputCurso');
+    cargarCursosEnSelect(selectCurso);
     
     document.getElementById('modalRegistro').style.display = 'block';
 }

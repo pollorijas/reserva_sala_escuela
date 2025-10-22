@@ -138,25 +138,7 @@ function actualizarInfoSemana() {
                     </div>
                 </div>
             </div>
-            
-            <div class="info-semana-detalles">
-                <div class="detalle-card">
-                    <span class="icono">📋</span>
-                    <span class="valor">${bloquesTotales}</span>
-                    <span class="etiqueta">Total bloques</span>
-                </div>
-                <div class="detalle-card">
-                    <span class="icono">📊</span>
-                    <span class="valor">${ocupacionPorDia.maxOcupacion.dia}</span>
-                    <span class="etiqueta">Día más ocupado</span>
-                </div>
-                <div class="detalle-card">
-                    <span class="icono">📈</span>
-                    <span class="valor">${ocupacionPorDia.maxOcupacion.porcentaje}%</span>
-                    <span class="etiqueta">Máx. ocupación</span>
-                </div>
-            </div>
-            
+                        
             <!-- NOTAS DE LA SEMANA - DESTACADAS PERO SOBRIAS -->
             <div class="notas-semana-container ${!semanaActual.notas ? 'sin-notas' : ''}">
                 <div class="notas-semana-titulo">

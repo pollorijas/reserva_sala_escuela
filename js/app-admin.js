@@ -844,7 +844,7 @@ function generarTablaPDF(doc, reservas, startX, startY, width) {
     }
 }
 
-// Función mejorada para PDF profesional
+// Función mejorada para exportar PDF profesional
 async function exportarPDFProfesional() {
     if (!semanaActual) {
         mostrarError('Primero selecciona una semana');
@@ -877,9 +877,9 @@ async function exportarPDFProfesional() {
         const margin = 15;
         const contentWidth = pageWidth - (margin * 2);
 
-        // Header con diseño profesional
+        // HEADER con verificación de color
         doc.setFillColor(41, 128, 185);
-        doc.rect(0, 0, pageWidth, 25, 'F');
+        doc.rect(0, 0, pageWidth, 25, 'F'); // 'F' para fill
         
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(16);
@@ -903,7 +903,7 @@ async function exportarPDFProfesional() {
             doc.setFont('helvetica', 'normal');
         }
 
-        // Generar tabla profesional
+        // Generar tabla con la función CORREGIDA
         generarTablaProfesionalPDF(doc, reservasCompletas, margin, 55, contentWidth);
 
         // Estadísticas
@@ -919,7 +919,8 @@ async function exportarPDFProfesional() {
         const ahora = new Date();
         doc.text(`Generado: ${ahora.toLocaleString('es-CL')}`, pageWidth - margin, 185, { align: 'right' });
 
-        doc.save(`horario_semana_${semanaActual.numero_semana}_profesional.pdf`);
+        // Guardar con nombre más descriptivo
+        doc.save(`horario_semana_${semanaActual.numero_semana}_${formatearFechaCorta(semanaActual.fecha_inicio)}.pdf`);
 
     } catch (error) {
         console.error('Error generando PDF profesional:', error);
@@ -927,118 +928,143 @@ async function exportarPDFProfesional() {
     }
 }
 
+// Versión ALTERNATIVA - Más simple y confiable
 function generarTablaProfesionalPDF(doc, reservas, startX, startY, width) {
     const dias = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES'];
     const colWidth = width / 6;
     const rowHeight = 9;
 
-    // Encabezados con diseño mejorado
-    doc.setFillColor(52, 152, 219);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
+    // COLORES DEFINIDOS
+    const COLOR_AZUL = [52, 152, 219];
+    const COLOR_GRIS = [245, 245, 245];
+    const COLOR_OCUPADO = [255, 245, 235];
+    const COLOR_DISPONIBLE = [235, 245, 235];
+    const COLOR_BLANCO = [255, 255, 255];
+
+    // Dibujar encabezados PRIMERO
+    doc.setFillColor(...COLOR_AZUL);
+    doc.roundedRect(startX, startY, colWidth, rowHeight, 2, 2, 'F');
     
-    // Encabezado de bloques
-    doc.roundedRect(startX, startY, colWidth, rowHeight, 1, 1, 'F');
-    doc.text('BLOQUE', startX + colWidth/2, startY + 5.5, { align: 'center' });
-    
-    // Encabezados de días
     dias.forEach((dia, index) => {
         const x = startX + colWidth * (index + 1);
-        doc.roundedRect(x, startY, colWidth, rowHeight, 1, 1, 'F');
+        doc.setFillColor(...COLOR_AZUL);
+        doc.roundedRect(x, startY, colWidth, rowHeight, 2, 2, 'F');
+    });
+
+    // Texto de encabezados DESPUÉS de dibujar
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.text('BLOQUE', startX + colWidth/2, startY + 5.5, { align: 'center' });
+    
+    dias.forEach((dia, index) => {
+        const x = startX + colWidth * (index + 1);
         doc.text(dia, x + colWidth/2, startY + 5.5, { align: 'center' });
     });
 
     let currentY = startY + rowHeight;
     doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'normal');
 
+    // Llenar datos
     for (let bloqueNum = 1; bloqueNum <= 8; bloqueNum++) {
         const bloqueLJ = bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Lunes-Jueves');
-        
         if (!bloqueLJ) continue;
 
         // Celda de bloque
-        doc.setFillColor(245, 245, 245);
-        doc.roundedRect(startX, currentY, colWidth, rowHeight, 1, 1, 'F');
+        doc.setFillColor(...COLOR_GRIS);
+        doc.roundedRect(startX, currentY, colWidth, rowHeight, 2, 2, 'F');
+        
         doc.setFont('helvetica', 'bold');
         doc.text(`Bloque ${bloqueNum}`, startX + 5, currentY + 3.5);
         doc.setFontSize(8);
-        doc.setFont('helvetica', 'normal');
         doc.text(`${bloqueLJ.hora_inicio}-${bloqueLJ.hora_fin}`, startX + 5, currentY + 6.5);
         doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
 
-        // Celdas de días
-        dias.forEach((dia, diaIndex) => {
+        // Para cada día
+        for (let diaIndex = 0; diaIndex < 5; diaIndex++) {
             const x = startX + colWidth * (diaIndex + 1);
+            const diaNombre = dias[diaIndex];
             
-            if (dia === 'VIERNES' && bloqueNum > 6) {
-                doc.setFillColor(250, 250, 250);
-                doc.roundedRect(x, currentY, colWidth, rowHeight, 1, 1, 'F');
+            // Viernes solo 6 bloques
+            if (diaNombre === 'VIERNES' && bloqueNum > 6) {
+                doc.setFillColor(...COLOR_BLANCO);
+                doc.roundedRect(x, currentY, colWidth, rowHeight, 2, 2, 'F');
                 doc.setTextColor(150, 150, 150);
                 doc.text('N/D', x + colWidth/2, currentY + 5, { align: 'center' });
                 doc.setTextColor(0, 0, 0);
-                return;
+                continue;
             }
 
-            const bloqueId = dia === 'VIERNES' ? 
+            const bloqueId = diaNombre === 'VIERNES' ? 
                 bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Viernes')?.id :
                 bloqueLJ.id;
             
-            if (!bloqueId) return;
+            if (!bloqueId) continue;
 
             const fecha = calcularFecha(semanaActual.fecha_inicio, diaIndex);
             const reserva = reservas.find(r => r.bloque_id === bloqueId && r.fecha === fecha);
 
             if (reserva) {
-                // Ocupado - diseño profesional
-                doc.setFillColor(255, 245, 235);
-                doc.roundedRect(x, currentY, colWidth, rowHeight, 1, 1, 'F');
+                doc.setFillColor(...COLOR_OCUPADO);
+                doc.roundedRect(x, currentY, colWidth, rowHeight, 2, 2, 'F');
                 
+                // Texto para bloque ocupado
                 doc.setFontSize(7);
                 doc.setFont('helvetica', 'bold');
-                doc.text(reserva.curso.substring(0, 12), x + 3, currentY + 3);
+                doc.text(truncarTexto(reserva.curso, 12), x + 3, currentY + 3);
                 doc.setFont('helvetica', 'normal');
-                doc.text(reserva.profesor.substring(0, 12), x + 3, currentY + 5.5);
+                doc.text(truncarTexto(reserva.profesor, 12), x + 3, currentY + 5.5);
                 
                 if (reserva.actividad) {
                     doc.setFontSize(6);
-                    doc.text(reserva.actividad.substring(0, 15) + '...', x + 3, currentY + 7.5);
+                    doc.text(truncarTexto(reserva.actividad, 15), x + 3, currentY + 7.5);
                 }
-                doc.setFontSize(10);
             } else {
-                // Disponible
-                doc.setFillColor(235, 245, 235);
-                doc.roundedRect(x, currentY, colWidth, rowHeight, 1, 1, 'F');
+                doc.setFillColor(...COLOR_DISPONIBLE);
+                doc.roundedRect(x, currentY, colWidth, rowHeight, 2, 2, 'F');
+                
+                // Texto para bloque disponible
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(39, 174, 96);
                 doc.text('DISPONIBLE', x + colWidth/2, currentY + 5, { align: 'center' });
                 doc.setTextColor(0, 0, 0);
-                doc.setFont('helvetica', 'normal');
             }
-        });
+            
+            // Restaurar configuración
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+        }
 
         currentY += rowHeight;
         
-        // Control de paginación
+        // Nueva página si es necesario
         if (currentY > 170 && bloqueNum < 8) {
             doc.addPage();
             currentY = 30;
             
             // Redibujar encabezados
-            doc.setFillColor(52, 152, 219);
+            doc.setFillColor(...COLOR_AZUL);
+            doc.roundedRect(margin, currentY, colWidth, rowHeight, 2, 2, 'F');
+            
+            dias.forEach((dia, index) => {
+                const x = margin + colWidth * (index + 1);
+                doc.setFillColor(...COLOR_AZUL);
+                doc.roundedRect(x, currentY, colWidth, rowHeight, 2, 2, 'F');
+            });
+            
             doc.setTextColor(255, 255, 255);
             doc.setFont('helvetica', 'bold');
-            
-            doc.roundedRect(margin, currentY, colWidth, rowHeight, 1, 1, 'F');
             doc.text('BLOQUE', margin + colWidth/2, currentY + 5.5, { align: 'center' });
             
             dias.forEach((dia, index) => {
                 const x = margin + colWidth * (index + 1);
-                doc.roundedRect(x, currentY, colWidth, rowHeight, 1, 1, 'F');
                 doc.text(dia, x + colWidth/2, currentY + 5.5, { align: 'center' });
             });
             
             currentY += rowHeight;
             doc.setTextColor(0, 0, 0);
+            doc.setFont('helvetica', 'normal');
         }
     }
 }

@@ -194,6 +194,41 @@ function actualizarInfoSemana() {
     `;
 }
 
+// Mantener la función calcularOcupacionPorDia igual que antes
+function calcularOcupacionPorDia() {
+    const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+    const bloquesPorDia = { 'Lunes': 8, 'Martes': 8, 'Miércoles': 8, 'Jueves': 8, 'Viernes': 6 };
+    
+    let maxOcupacion = { dia: '', porcentaje: 0 };
+    const ocupacion = {};
+    
+    dias.forEach((dia, index) => {
+        const bloquesDia = bloquesPorDia[dia];
+        let ocupadosDia = 0;
+        
+        for (let bloqueNum = 1; bloqueNum <= bloquesDia; bloqueNum++) {
+            const bloqueId = dia === 'Viernes' ? 
+                bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Viernes')?.id :
+                bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Lunes-Jueves')?.id;
+            
+            if (bloqueId) {
+                const fecha = calcularFecha(semanaActual.fecha_inicio, index);
+                const reserva = reservas.find(r => r.bloque_id === bloqueId && r.fecha === fecha);
+                if (reserva) ocupadosDia++;
+            }
+        }
+        
+        const porcentajeDia = Math.round((ocupadosDia / bloquesDia) * 100);
+        ocupacion[dia] = { ocupados: ocupadosDia, total: bloquesDia, porcentaje: porcentajeDia };
+        
+        if (porcentajeDia > maxOcupacion.porcentaje) {
+            maxOcupacion = { dia: dia, porcentaje: porcentajeDia };
+        }
+    });
+    
+    return { porDia: ocupacion, maxOcupacion: maxOcupacion };
+}
+
 // Generar tabla de horarios
 async function generarTablaHorarios() {
     console.log('Generando tabla de horarios...');

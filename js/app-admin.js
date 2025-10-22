@@ -1068,3 +1068,9 @@ function generarTablaProfesionalPDF(doc, reservas, startX, startY, width) {
         }
     }
 }
+
+// Función auxiliar para truncar texto
+function truncarTexto(texto, maxLength) {
+    if (!texto) return '';
+    return texto.length > maxLength ? texto.substring(0, maxLength) : texto;
+}

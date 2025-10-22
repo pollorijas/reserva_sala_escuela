@@ -105,7 +105,8 @@ async function cargarReservasSemana(semanaId) {
     actualizarInfoSemana();
 }
 
-// En app-admin.js - REEMPLAZAR la función actualizarInfoSemana con versión corregida
+// En app-admin.js - CORREGIR la parte de última reserva en actualizarInfoSemana
+
 function actualizarInfoSemana() {
     const infoContainer = document.getElementById('infoSemana');
     if (!semanaActual) {
@@ -120,8 +121,30 @@ function actualizarInfoSemana() {
     
     // Calcular estadísticas básicas
     const ocupacionPorDia = calcularOcupacionPorDia();
-    const ultimaReserva = reservas.length > 0 ? 
-        new Date(Math.max(...reservas.map(r => new Date(r.fecha)))) : null;
+    
+    // CORREGIDO: Manejo seguro de última reserva
+    let ultimaReservaTexto = 'N/A';
+    if (reservas.length > 0) {
+        try {
+            // Encontrar la fecha más reciente de manera segura
+            let fechaMax = null;
+            reservas.forEach(reserva => {
+                const fechaReserva = new Date(reserva.fecha + 'T12:00:00-03:00');
+                if (!isNaN(fechaReserva.getTime())) {
+                    if (!fechaMax || fechaReserva > fechaMax) {
+                        fechaMax = fechaReserva;
+                    }
+                }
+            });
+            
+            if (fechaMax) {
+                ultimaReservaTexto = formatearFechaCorta(fechaMax);
+            }
+        } catch (error) {
+            console.error('Error calculando última reserva:', error);
+            ultimaReservaTexto = 'Error';
+        }
+    }
     
     infoContainer.innerHTML = `
         <div class="info-semana admin">
@@ -171,12 +194,12 @@ function actualizarInfoSemana() {
                 </div>
                 <div class="detalle-card">
                     <span class="icono">🔄</span>
-                    <span class="valor">${ultimaReserva ? formatearFechaCorta(ultimaReserva) : 'N/A'}</span>
+                    <span class="valor">${ultimaReservaTexto}</span>
                     <span class="etiqueta">Última reserva</span>
                 </div>
             </div>
             
-            <!-- NOTAS DE LA SEMANA - DESTACADAS PERO SOBRIAS -->
+            <!-- NOTAS DE LA SEMANA -->
             <div class="notas-semana-container ${!semanaActual.notas ? 'sin-notas' : ''}">
                 <div class="notas-semana-titulo">
                     <span class="icono">📌</span>
@@ -188,10 +211,81 @@ function actualizarInfoSemana() {
             </div>
             
             <div class="zona-horaria-info">
-                📍 Chile - ${new Date().toLocaleDateString('es-CL')}
+                📍 Chile - ${formatearFechaCorta(new Date())}
             </div>
         </div>
     `;
+}
+
+// En app-admin.js - MEJORAR la función calcularOcupacionPorDia
+function calcularOcupacionPorDia() {
+    // Valores por defecto
+    const resultadoDefault = { 
+        porDia: {}, 
+        maxOcupacion: { dia: 'N/A', porcentaje: 0 } 
+    };
+    
+    if (!semanaActual || !bloques || !Array.isArray(bloques)) {
+        return resultadoDefault;
+    }
+    
+    try {
+        const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+        const bloquesPorDia = { 
+            'Lunes': 8, 
+            'Martes': 8, 
+            'Miércoles': 8, 
+            'Jueves': 8, 
+            'Viernes': 6 
+        };
+        
+        let maxOcupacion = { dia: 'N/A', porcentaje: 0 };
+        const ocupacion = {};
+        
+        dias.forEach((dia, index) => {
+            const bloquesDia = bloquesPorDia[dia];
+            let ocupadosDia = 0;
+            
+            for (let bloqueNum = 1; bloqueNum <= bloquesDia; bloqueNum++) {
+                try {
+                    const bloqueId = dia === 'Viernes' ? 
+                        bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Viernes')?.id :
+                        bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Lunes-Jueves')?.id;
+                    
+                    if (bloqueId) {
+                        const fecha = calcularFecha(semanaActual.fecha_inicio, index);
+                        const reserva = reservas.find(r => {
+                            try {
+                                return r.bloque_id === bloqueId && r.fecha === fecha;
+                            } catch (e) {
+                                return false;
+                            }
+                        });
+                        if (reserva) ocupadosDia++;
+                    }
+                } catch (error) {
+                    console.warn(`Error procesando bloque ${bloqueNum} del ${dia}:`, error);
+                }
+            }
+            
+            const porcentajeDia = bloquesDia > 0 ? Math.round((ocupadosDia / bloquesDia) * 100) : 0;
+            ocupacion[dia] = { 
+                ocupados: ocupadosDia, 
+                total: bloquesDia, 
+                porcentaje: porcentajeDia 
+            };
+            
+            if (porcentajeDia > maxOcupacion.porcentaje) {
+                maxOcupacion = { dia: dia, porcentaje: porcentajeDia };
+            }
+        });
+        
+        return { porDia: ocupacion, maxOcupacion: maxOcupacion };
+        
+    } catch (error) {
+        console.error('Error en calcularOcupacionPorDia:', error);
+        return resultadoDefault;
+    }
 }
 
 // Mantener la función calcularOcupacionPorDia igual que antes

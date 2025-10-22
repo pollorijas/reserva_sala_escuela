@@ -6,7 +6,7 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 // Funciones comunes para ambas versiones
 
 // Formateo de fechas CORREGIDO para Chile
-function formatearFecha(fechaString) {
+/*function formatearFecha(fechaString) {
     if (!fechaString) return '';
     
     // Crear fecha específicamente para Chile
@@ -45,6 +45,108 @@ function formatearFechaCorta(fechaString) {
         return new Intl.DateTimeFormat('es-CL', options).format(fecha);
     } catch (e) {
         return new Intl.DateTimeFormat('es-ES', options).format(fecha);
+    }
+}*/
+
+// En common.js - REEMPLAZAR la función formatearFechaCorta
+
+function formatearFechaCorta(fechaInput) {
+    if (!fechaInput) return '';
+    
+    let fecha;
+    
+    try {
+        // Si es string en formato YYYY-MM-DD
+        if (typeof fechaInput === 'string' && fechaInput.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            fecha = new Date(fechaInput + 'T12:00:00-03:00');
+        } 
+        // Si es un objeto Date
+        else if (fechaInput instanceof Date) {
+            fecha = fechaInput;
+        }
+        // Si es otro tipo de string
+        else if (typeof fechaInput === 'string') {
+            // Intentar parsear de diferentes formas
+            fecha = new Date(fechaInput);
+            
+            // Si falla, intentar con formato día/mes/año
+            if (isNaN(fecha.getTime()) && fechaInput.includes('/')) {
+                const partes = fechaInput.split('/');
+                if (partes.length === 3) {
+                    fecha = new Date(partes[2], partes[1] - 1, partes[0]);
+                }
+            }
+        }
+        // Si es número (timestamp)
+        else if (typeof fechaInput === 'number') {
+            fecha = new Date(fechaInput);
+        }
+        // Cualquier otro caso
+        else {
+            console.warn('Formato de fecha no reconocido:', fechaInput);
+            return '';
+        }
+        
+        // Verificar si la fecha es válida
+        if (isNaN(fecha.getTime())) {
+            console.warn('Fecha inválida:', fechaInput);
+            return '';
+        }
+        
+        // Formatear manualmente para evitar problemas con Intl
+        const dia = fecha.getDate().toString().padStart(2, '0');
+        const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+        const anio = fecha.getFullYear();
+        
+        return `${dia}/${mes}/${anio}`;
+        
+    } catch (error) {
+        console.error('Error formateando fecha:', error, 'Input:', fechaInput);
+        return '';
+    }
+}
+
+// Función auxiliar para formatear fechas largas (también corregida)
+function formatearFecha(fechaString) {
+    if (!fechaString) return '';
+    
+    try {
+        // Crear fecha específicamente para Chile
+        const fecha = new Date(fechaString + 'T12:00:00-03:00');
+        
+        if (isNaN(fecha.getTime())) {
+            console.warn('Fecha inválida en formatearFecha:', fechaString);
+            return '';
+        }
+        
+        const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric'
+        };
+        
+        // Intentar con formateador internacional
+        try {
+            return new Intl.DateTimeFormat('es-CL', options).format(fecha);
+        } catch (e) {
+            // Fallback manual
+            const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+            const meses = [
+                'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+            ];
+            
+            const diaSemana = dias[fecha.getDay()];
+            const dia = fecha.getDate();
+            const mes = meses[fecha.getMonth()];
+            const anio = fecha.getFullYear();
+            
+            return `${diaSemana} ${dia} de ${mes} de ${anio}`;
+        }
+    } catch (error) {
+        console.error('Error en formatearFecha:', error);
+        return '';
     }
 }
 

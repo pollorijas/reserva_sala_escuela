@@ -105,7 +105,7 @@ async function cargarReservasSemana(semanaId) {
     actualizarInfoSemana();
 }
 
-// Actualizar información de la semana
+// En app-admin.js - REEMPLAZAR la función actualizarInfoSemana
 function actualizarInfoSemana() {
     const infoContainer = document.getElementById('infoSemana');
     if (!semanaActual) {
@@ -116,29 +116,121 @@ function actualizarInfoSemana() {
     const reservasCount = reservas.length;
     const bloquesTotales = 34;
     const porcentajeOcupacion = Math.round(reservasCount/bloquesTotales*100);
+    const bloquesDisponibles = bloquesTotales - reservasCount;
+    
+    // Calcular estadísticas avanzadas
+    const ocupacionPorDia = calcularOcupacionPorDia();
+    const ultimaReserva = reservas.length > 0 ? 
+        new Date(Math.max(...reservas.map(r => new Date(r.fecha)))) : null;
+    
+    // Determinar color del porcentaje
+    const colorPorcentaje = porcentajeOcupacion > 80 ? '#ff6b6b' : 
+                           porcentajeOcupacion > 50 ? '#feca57' : '#1dd1a1';
     
     infoContainer.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
-            <div style="flex: 1;">
-                <h3>Semana ${semanaActual.numero_semana}</h3>
-                <p><strong>Período:</strong> ${formatearFecha(semanaActual.fecha_inicio)} - ${formatearFecha(semanaActual.fecha_fin)}</p>
-                <p><strong>Bloques ocupados:</strong> ${reservasCount} / ${bloquesTotales} (${porcentajeOcupacion}%)</p>
-                ${semanaActual.notas ? `
-                    <div class="notas-semana">
-                        <strong>📌 Notas:</strong> ${semanaActual.notas}
+        <div class="info-semana admin">
+            <div class="info-semana-header">
+                <div class="info-semana-titulo">
+                    <h3>📅 Semana ${semanaActual.numero_semana}</h3>
+                    <p>${formatearFecha(semanaActual.fecha_inicio)} - ${formatearFecha(semanaActual.fecha_fin)}</p>
+                </div>
+                
+                <div class="info-semana-estadisticas">
+                    <div class="estadistica-principal">
+                        <span class="porcentaje-ocupacion" style="color: ${colorPorcentaje}">${porcentajeOcupacion}%</span>
+                        <span class="texto-estadistica">de ocupación</span>
                     </div>
-                ` : '<p class="sin-notas">ℹ️ No hay notas para esta semana</p>'}
-            </div>
-            <div>
+                    <div class="detalles-estadistica">
+                        <div class="detalle-item">
+                            <strong>${reservasCount}</strong>
+                            <div>ocupados</div>
+                        </div>
+                        <div class="detalle-item">
+                            <strong>${bloquesDisponibles}</strong>
+                            <div>disponibles</div>
+                        </div>
+                    </div>
+                </div>
+                
                 <button onclick="abrirModalEditarNotas()" class="btn-editar-notas">
                     ✏️ Editar Notas
                 </button>
             </div>
-        </div>
-        <div class="zona-horaria-info">
-            📍 Zona horaria: Chile (UTC-3)
+            
+            <div class="info-semana-detalles">
+                <div class="detalle-card">
+                    <span class="icono">📋</span>
+                    <span class="valor">${bloquesTotales}</span>
+                    <span class="etiqueta">Bloques totales</span>
+                </div>
+                <div class="detalle-card">
+                    <span class="icono">📊</span>
+                    <span class="valor">${ocupacionPorDia.maxOcupacion.dia}</span>
+                    <span class="etiqueta">Día más ocupado</span>
+                </div>
+                <div class="detalle-card">
+                    <span class="icono">📈</span>
+                    <span class="valor">${ocupacionPorDia.maxOcupacion.porcentaje}%</span>
+                    <span class="etiqueta">Máxima ocupación</span>
+                </div>
+                <div class="detalle-card">
+                    <span class="icono">🔄</span>
+                    <span class="valor">${ultimaReserva ? formatearFechaCorta(ultimaReserva) : 'N/A'}</span>
+                    <span class="etiqueta">Última reserva</span>
+                </div>
+            </div>
+            
+            <!-- NOTAS DE LA SEMANA - RESALTADAS -->
+            <div class="notas-semana-container ${!semanaActual.notas ? 'sin-notas' : ''}">
+                <div class="notas-semana-titulo">
+                    <span class="icono">📌</span>
+                    <span>Información importante de la semana</span>
+                </div>
+                <div class="notas-semana-contenido">
+                    ${semanaActual.notas ? semanaActual.notas : 'No hay notas específicas para esta semana. Click en "Editar Notas" para agregar información importante.'}
+                </div>
+            </div>
+            
+            <div class="zona-horaria-info">
+                📍 Zona horaria: Chile (UTC-3) - ${new Date().toLocaleDateString('es-CL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </div>
         </div>
     `;
+}
+
+// Agregar también la función calcularOcupacionPorDia en app-admin.js
+function calcularOcupacionPorDia() {
+    const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+    const bloquesPorDia = { 'Lunes': 8, 'Martes': 8, 'Miércoles': 8, 'Jueves': 8, 'Viernes': 6 };
+    
+    let maxOcupacion = { dia: '', porcentaje: 0 };
+    const ocupacion = {};
+    
+    dias.forEach((dia, index) => {
+        const bloquesDia = bloquesPorDia[dia];
+        let ocupadosDia = 0;
+        
+        for (let bloqueNum = 1; bloqueNum <= bloquesDia; bloqueNum++) {
+            const bloqueId = dia === 'Viernes' ? 
+                bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Viernes')?.id :
+                bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Lunes-Jueves')?.id;
+            
+            if (bloqueId) {
+                const fecha = calcularFecha(semanaActual.fecha_inicio, index);
+                const reserva = reservas.find(r => r.bloque_id === bloqueId && r.fecha === fecha);
+                if (reserva) ocupadosDia++;
+            }
+        }
+        
+        const porcentajeDia = Math.round((ocupadosDia / bloquesDia) * 100);
+        ocupacion[dia] = { ocupados: ocupadosDia, total: bloquesDia, porcentaje: porcentajeDia };
+        
+        if (porcentajeDia > maxOcupacion.porcentaje) {
+            maxOcupacion = { dia: dia, porcentaje: porcentajeDia };
+        }
+    });
+    
+    return { porDia: ocupacion, maxOcupacion: maxOcupacion };
 }
 
 // Generar tabla de horarios
@@ -225,52 +317,6 @@ async function generarTablaHorarios() {
     }
 }
 
-// Abrir modal para registro nuevo
-/*function abrirModalRegistro(bloqueId, dia, nombreDia) {
-    if (!semanaActual) return;
-    
-    const fecha = calcularFecha(semanaActual.fecha_inicio, dia);
-    const bloque = bloques.find(b => b.id === bloqueId);
-    
-    document.getElementById('bloqueSeleccionado').value = bloqueId;
-    document.getElementById('fechaSeleccionada').value = fecha;
-    document.getElementById('reservaId').value = '';
-    
-    // Configurar modal para nueva reserva
-    document.getElementById('tituloModalRegistro').textContent = 
-        `Registrar Uso - ${nombreDia} Bloque ${bloque.numero_bloque} (${bloque.hora_inicio} - ${bloque.hora_fin})`;
-    
-    document.getElementById('btnLiberar').style.display = 'none';
-    document.getElementById('formRegistro').reset();
-    
-    document.getElementById('modalRegistro').style.display = 'block';
-}
-
-// Abrir modal para edición
-function abrirModalEdicion(reserva, bloqueId, dia, nombreDia) {
-    if (!semanaActual) return;
-    
-    const bloque = bloques.find(b => b.id === bloqueId);
-    
-    document.getElementById('bloqueSeleccionado').value = bloqueId;
-    document.getElementById('fechaSeleccionada').value = reserva.fecha;
-    document.getElementById('reservaId').value = reserva.id;
-    
-    // Llenar formulario con datos existentes
-    document.getElementById('inputCurso').value = reserva.curso;
-    document.getElementById('inputProfesor').value = reserva.profesor;
-    document.getElementById('inputActividad').value = reserva.actividad || '';
-    document.getElementById('inputObservaciones').value = reserva.observaciones || '';
-    
-    // Configurar modal para edición
-    document.getElementById('tituloModalRegistro').textContent = 
-        `Editar Reserva - ${nombreDia} Bloque ${bloque.numero_bloque} (${bloque.hora_inicio} - ${bloque.hora_fin})`;
-    
-    document.getElementById('btnLiberar').style.display = 'inline-block';
-    
-    reservaSeleccionada = reserva;
-    document.getElementById('modalRegistro').style.display = 'block';
-}*/
 
 // En app-admin.js - MODIFICAR la función abrirModalRegistro
 function abrirModalRegistro(bloqueId, dia, nombreDia) {

@@ -843,3 +843,202 @@ function generarTablaPDF(doc, reservas, startX, startY, width) {
         }
     }
 }
+
+// Función mejorada para PDF profesional
+async function exportarPDFProfesional() {
+    if (!semanaActual) {
+        mostrarError('Primero selecciona una semana');
+        return;
+    }
+
+    try {
+        mostrarExito('🔄 Generando PDF profesional...');
+        
+        const { data: reservasCompletas, error } = await supabase
+            .from('reservas')
+            .select(`
+                *,
+                bloques (*)
+            `)
+            .eq('semana_id', semanaActual.id)
+            .order('fecha')
+            .order('bloques(numero_bloque)');
+
+        if (error) throw error;
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 15;
+        const contentWidth = pageWidth - (margin * 2);
+
+        // Header con diseño profesional
+        doc.setFillColor(41, 128, 185);
+        doc.rect(0, 0, pageWidth, 25, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text('HORARIO SEMANAL DE SALA', pageWidth / 2, 12, { align: 'center' });
+        
+        doc.setFontSize(10);
+        doc.text('Sistema de Gestión de Salas', pageWidth / 2, 18, { align: 'center' });
+
+        // Información de la semana
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`SEMANA ${semanaActual.numero_semana}`, margin, 35);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Del ${formatearFecha(semanaActual.fecha_inicio)} al ${formatearFecha(semanaActual.fecha_fin)}`, margin, 42);
+
+        if (semanaActual.notas) {
+            doc.setFont('helvetica', 'italic');
+            doc.text(`Notas: ${semanaActual.notas}`, margin, 49);
+            doc.setFont('helvetica', 'normal');
+        }
+
+        // Generar tabla profesional
+        generarTablaProfesionalPDF(doc, reservasCompletas, margin, 55, contentWidth);
+
+        // Estadísticas
+        const totalBloques = 34;
+        const bloquesOcupados = reservasCompletas.length;
+        const porcentaje = Math.round((bloquesOcupados / totalBloques) * 100);
+        
+        doc.setFontSize(9);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Estadísticas: ${bloquesOcupados}/${totalBloques} bloques ocupados (${porcentaje}%)`, margin, 185);
+
+        // Pie de página
+        const ahora = new Date();
+        doc.text(`Generado: ${ahora.toLocaleString('es-CL')}`, pageWidth - margin, 185, { align: 'right' });
+
+        doc.save(`horario_semana_${semanaActual.numero_semana}_profesional.pdf`);
+
+    } catch (error) {
+        console.error('Error generando PDF profesional:', error);
+        mostrarError('Error al generar PDF: ' + error.message);
+    }
+}
+
+function generarTablaProfesionalPDF(doc, reservas, startX, startY, width) {
+    const dias = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES'];
+    const colWidth = width / 6;
+    const rowHeight = 9;
+
+    // Encabezados con diseño mejorado
+    doc.setFillColor(52, 152, 219);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    
+    // Encabezado de bloques
+    doc.roundedRect(startX, startY, colWidth, rowHeight, 1, 1, 'F');
+    doc.text('BLOQUE', startX + colWidth/2, startY + 5.5, { align: 'center' });
+    
+    // Encabezados de días
+    dias.forEach((dia, index) => {
+        const x = startX + colWidth * (index + 1);
+        doc.roundedRect(x, startY, colWidth, rowHeight, 1, 1, 'F');
+        doc.text(dia, x + colWidth/2, startY + 5.5, { align: 'center' });
+    });
+
+    let currentY = startY + rowHeight;
+    doc.setTextColor(0, 0, 0);
+
+    for (let bloqueNum = 1; bloqueNum <= 8; bloqueNum++) {
+        const bloqueLJ = bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Lunes-Jueves');
+        
+        if (!bloqueLJ) continue;
+
+        // Celda de bloque
+        doc.setFillColor(245, 245, 245);
+        doc.roundedRect(startX, currentY, colWidth, rowHeight, 1, 1, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Bloque ${bloqueNum}`, startX + 5, currentY + 3.5);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${bloqueLJ.hora_inicio}-${bloqueLJ.hora_fin}`, startX + 5, currentY + 6.5);
+        doc.setFontSize(10);
+
+        // Celdas de días
+        dias.forEach((dia, diaIndex) => {
+            const x = startX + colWidth * (diaIndex + 1);
+            
+            if (dia === 'VIERNES' && bloqueNum > 6) {
+                doc.setFillColor(250, 250, 250);
+                doc.roundedRect(x, currentY, colWidth, rowHeight, 1, 1, 'F');
+                doc.setTextColor(150, 150, 150);
+                doc.text('N/D', x + colWidth/2, currentY + 5, { align: 'center' });
+                doc.setTextColor(0, 0, 0);
+                return;
+            }
+
+            const bloqueId = dia === 'VIERNES' ? 
+                bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Viernes')?.id :
+                bloqueLJ.id;
+            
+            if (!bloqueId) return;
+
+            const fecha = calcularFecha(semanaActual.fecha_inicio, diaIndex);
+            const reserva = reservas.find(r => r.bloque_id === bloqueId && r.fecha === fecha);
+
+            if (reserva) {
+                // Ocupado - diseño profesional
+                doc.setFillColor(255, 245, 235);
+                doc.roundedRect(x, currentY, colWidth, rowHeight, 1, 1, 'F');
+                
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'bold');
+                doc.text(reserva.curso.substring(0, 12), x + 3, currentY + 3);
+                doc.setFont('helvetica', 'normal');
+                doc.text(reserva.profesor.substring(0, 12), x + 3, currentY + 5.5);
+                
+                if (reserva.actividad) {
+                    doc.setFontSize(6);
+                    doc.text(reserva.actividad.substring(0, 15) + '...', x + 3, currentY + 7.5);
+                }
+                doc.setFontSize(10);
+            } else {
+                // Disponible
+                doc.setFillColor(235, 245, 235);
+                doc.roundedRect(x, currentY, colWidth, rowHeight, 1, 1, 'F');
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(39, 174, 96);
+                doc.text('DISPONIBLE', x + colWidth/2, currentY + 5, { align: 'center' });
+                doc.setTextColor(0, 0, 0);
+                doc.setFont('helvetica', 'normal');
+            }
+        });
+
+        currentY += rowHeight;
+        
+        // Control de paginación
+        if (currentY > 170 && bloqueNum < 8) {
+            doc.addPage();
+            currentY = 30;
+            
+            // Redibujar encabezados
+            doc.setFillColor(52, 152, 219);
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            
+            doc.roundedRect(margin, currentY, colWidth, rowHeight, 1, 1, 'F');
+            doc.text('BLOQUE', margin + colWidth/2, currentY + 5.5, { align: 'center' });
+            
+            dias.forEach((dia, index) => {
+                const x = margin + colWidth * (index + 1);
+                doc.roundedRect(x, currentY, colWidth, rowHeight, 1, 1, 'F');
+                doc.text(dia, x + colWidth/2, currentY + 5.5, { align: 'center' });
+            });
+            
+            currentY += rowHeight;
+            doc.setTextColor(0, 0, 0);
+        }
+    }
+}

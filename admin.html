@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/styles-admin.css">
     <link rel="stylesheet" href="css/mobile.css">
+    <!-- En admin.html - agregar antes de los otros scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -23,6 +26,7 @@
             </select>
             <button onclick="abrirModalNuevaSemana()" class="btn-primary">Nueva Semana</button>
             <button onclick="exportarDatos()" class="btn-success">Exportar Datos</button>
+            <button onclick="exportarPDF()" class="btn-warning">📄 Exportar PDF</button>
         </div>
 
         <div class="info-semana" id="infoSemana">

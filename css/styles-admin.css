@@ -218,3 +218,19 @@ body {
     border-radius: 4px;
     text-align: center;
 }
+
+.btn-warning {
+    background-color: #f39c12;
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: #e67e22;
+}
+
+/* Para el botón PDF específicamente */
+.btn-pdf {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    font-weight: bold;
+}

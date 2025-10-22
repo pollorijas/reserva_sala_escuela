@@ -651,3 +651,195 @@ window.onclick = function(event) {
 
 // Asignar eventos a los botones
 document.getElementById('btnLiberar').onclick = liberarBloque;
+
+// Función para exportar semana como PDF
+async function exportarPDF() {
+    if (!semanaActual) {
+        mostrarError('Primero selecciona una semana');
+        return;
+    }
+
+    try {
+        // Mostrar mensaje de carga
+        mostrarExito('🔄 Generando PDF... Esto puede tomar unos segundos.');
+        
+        // Obtener datos completos de la semana
+        const { data: reservasCompletas, error } = await supabase
+            .from('reservas')
+            .select(`
+                *,
+                bloques (*)
+            `)
+            .eq('semana_id', semanaActual.id)
+            .order('fecha')
+            .order('bloques(numero_bloque)');
+
+        if (error) throw error;
+
+        // Crear PDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        // Configuración
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 10;
+        const contentWidth = pageWidth - (margin * 2);
+
+        // Título principal
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('REGISTRO SEMANAL DE SALA', pageWidth / 2, 15, { align: 'center' });
+
+        // Información de la semana
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Semana: ${semanaActual.numero_semana}`, margin, 25);
+        doc.text(`Período: ${formatearFechaCorta(semanaActual.fecha_inicio)} - ${formatearFechaCorta(semanaActual.fecha_fin)}`, margin, 32);
+        
+        // Notas de la semana (si existen)
+        if (semanaActual.notas) {
+            doc.text(`Notas: ${semanaActual.notas}`, margin, 39);
+        }
+
+        // Generar tabla de horarios
+        generarTablaPDF(doc, reservasCompletas, margin, 50, contentWidth);
+
+        // Pie de página
+        const fechaGeneracion = new Date().toLocaleDateString('es-CL');
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`Generado el: ${fechaGeneracion} - Sistema de Registro de Sala`, pageWidth / 2, 190, { align: 'center' });
+
+        // Guardar PDF
+        doc.save(`horario_semana_${semanaActual.numero_semana}.pdf`);
+
+    } catch (error) {
+        console.error('Error generando PDF:', error);
+        mostrarError('Error al generar PDF: ' + error.message);
+    }
+}
+
+// Función para generar la tabla en el PDF
+function generarTablaPDF(doc, reservas, startX, startY, width) {
+    const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+    const bloquesPorDia = {
+        'Lunes': 8, 'Martes': 8, 'Miércoles': 8, 'Jueves': 8, 'Viernes': 6
+    };
+
+    // Configurar la tabla
+    const colWidth = width / 6; // 1 columna para bloques + 5 para días
+    const rowHeight = 8;
+    
+    // Encabezados de columnas
+    doc.setFillColor(52, 73, 94); // Color azul oscuro
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    
+    // Dibujar encabezados
+    doc.rect(startX, startY, colWidth, rowHeight, 'F');
+    doc.text('BLOQUE', startX + colWidth/2, startY + 5, { align: 'center' });
+    
+    dias.forEach((dia, index) => {
+        const x = startX + colWidth * (index + 1);
+        doc.rect(x, startY, colWidth, rowHeight, 'F');
+        doc.text(dia.toUpperCase(), x + colWidth/2, startY + 5, { align: 'center' });
+    });
+
+    let currentY = startY + rowHeight;
+
+    // Llenar datos de los bloques
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'normal');
+    
+    for (let bloqueNum = 1; bloqueNum <= 8; bloqueNum++) {
+        // Fila del bloque
+        const bloqueLJ = bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Lunes-Jueves');
+        const bloqueV = bloques.find(b => b.numero_bloque === bloqueNum && b.dia_semana === 'Viernes');
+        
+        // Celda del número de bloque
+        if (bloqueLJ) {
+            doc.setFillColor(240, 240, 240);
+            doc.rect(startX, currentY, colWidth, rowHeight, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Bloque ${bloqueNum}`, startX + 5, currentY + 5);
+            doc.text(`${bloqueLJ.hora_inicio}-${bloqueLJ.hora_fin}`, startX + 5, currentY + 10);
+            doc.setFont('helvetica', 'normal');
+        }
+
+        // Celdas para cada día
+        dias.forEach((dia, diaIndex) => {
+            const x = startX + colWidth * (diaIndex + 1);
+            
+            // Verificar si el bloque existe para este día
+            if ((dia === 'Viernes' && bloqueNum > 6) || !bloqueLJ) {
+                doc.setFillColor(250, 250, 250);
+                doc.rect(x, currentY, colWidth, rowHeight, 'F');
+                doc.text('N/A', x + colWidth/2, currentY + 5, { align: 'center' });
+                return;
+            }
+
+            const bloqueId = dia === 'Viernes' ? 
+                (bloqueV ? bloqueV.id : null) : 
+                (bloqueLJ ? bloqueLJ.id : null);
+            
+            if (!bloqueId) {
+                doc.setFillColor(250, 250, 250);
+                doc.rect(x, currentY, colWidth, rowHeight, 'F');
+                return;
+            }
+
+            const fecha = calcularFecha(semanaActual.fecha_inicio, diaIndex);
+            const reserva = reservas.find(r => 
+                r.bloque_id === bloqueId && r.fecha === fecha
+            );
+
+            if (reserva) {
+                // Bloque ocupado
+                doc.setFillColor(255, 243, 205); // Amarillo claro
+                doc.rect(x, currentY, colWidth, rowHeight, 'F');
+                doc.setFontSize(7);
+                doc.text(reserva.curso, x + 2, currentY + 3);
+                doc.text(reserva.profesor, x + 2, currentY + 6);
+                if (reserva.actividad) {
+                    doc.text(reserva.actividad.substring(0, 15) + '...', x + 2, currentY + 9);
+                }
+                doc.setFontSize(10);
+            } else {
+                // Bloque libre
+                doc.setFillColor(212, 237, 218); // Verde claro
+                doc.rect(x, currentY, colWidth, rowHeight, 'F');
+                doc.text('DISPONIBLE', x + colWidth/2, currentY + 5, { align: 'center' });
+            }
+        });
+
+        currentY += rowHeight;
+        
+        // Verificar si necesita nueva página
+        if (currentY > 170 && bloqueNum < 8) {
+            doc.addPage();
+            currentY = 20;
+            
+            // Redibujar encabezados en nueva página
+            doc.setFillColor(52, 73, 94);
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            
+            doc.rect(margin, currentY, colWidth, rowHeight, 'F');
+            doc.text('BLOQUE', margin + colWidth/2, currentY + 5, { align: 'center' });
+            
+            dias.forEach((dia, index) => {
+                const x = margin + colWidth * (index + 1);
+                doc.rect(x, currentY, colWidth, rowHeight, 'F');
+                doc.text(dia.toUpperCase(), x + colWidth/2, currentY + 5, { align: 'center' });
+            });
+            
+            currentY += rowHeight;
+            doc.setTextColor(0, 0, 0);
+            doc.setFont('helvetica', 'normal');
+        }
+    }
+}

@@ -1,55 +1,13 @@
 // Configuración de Supabase - REEMPLAZA CON TUS CREDENCIALES
+import { createClient } from 'npm:@supabase/supabase-js@2'
+
 const supabaseUrl = 'https://iuspypmzrwzlqolbkjhl.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1c3B5cG16cnd6bHFvbGJramhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1OTA5NDIsImV4cCI6MjA3NjE2Njk0Mn0.da86H7bm7lZ5T66qaNyjl1iflQ1xN-iy_5wanhdLzHE';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Funciones comunes para ambas versiones
 
-// Formateo de fechas CORREGIDO para Chile
-/*function formatearFecha(fechaString) {
-    if (!fechaString) return '';
-    
-    // Crear fecha específicamente para Chile
-    const fecha = new Date(fechaString + 'T12:00:00-03:00');
-    
-    const options = { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        timeZone: 'America/Santiago'
-    };
-    
-    // Usar formateador con zona horaria específica
-    try {
-        return new Intl.DateTimeFormat('es-CL', options).format(fecha);
-    } catch (e) {
-        // Fallback si es-CL no está disponible
-        return new Intl.DateTimeFormat('es-ES', options).format(fecha);
-    }
-}
-
-function formatearFechaCorta(fechaString) {
-    if (!fechaString) return '';
-    
-    const fecha = new Date(fechaString + 'T12:00:00-03:00');
-    
-    const options = {
-        day: '2-digit',
-        month: '2-digit', 
-        year: 'numeric',
-        timeZone: 'America/Santiago'
-    };
-    
-    try {
-        return new Intl.DateTimeFormat('es-CL', options).format(fecha);
-    } catch (e) {
-        return new Intl.DateTimeFormat('es-ES', options).format(fecha);
-    }
-}*/
-
 // En common.js - REEMPLAZAR la función formatearFechaCorta
-
 function formatearFechaCorta(fechaInput) {
     if (!fechaInput) return '';
     

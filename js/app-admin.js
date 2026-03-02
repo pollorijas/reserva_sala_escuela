@@ -72,8 +72,23 @@ async function cargarSemanas() {
             select.appendChild(option);
         });
         
-        semanaActual = data[0];
-        await cargarReservasSemana(semanaActual.id);
+        //semanaActual = data[0];
+        //await cargarReservasSemana(semanaActual.id);
+
+        // Determinar la semana actual basada en la fecha de hoy
+        const hoyStr = new Date().toISOString().split('T')[0]; // formato YYYY-MM-DD
+        let semanaActualEncontrada = data.find(semana => 
+            semana.fecha_inicio <= hoyStr && semana.fecha_fin >= hoyStr
+        );
+        
+        // Si no hay semana que contenga hoy, usar la primera (más reciente)
+        if (!semanaActualEncontrada) {
+            semanaActualEncontrada = data[0];
+        }
+
+        // Actualizar la variable global
+        semanaActual = semanaActualEncontrada;
+
     }
     
     select.onchange = async function() {
@@ -406,53 +421,6 @@ async function generarTablaHorarios() {
         cuerpo.appendChild(fila);
     }
 }
-
-// Abrir modal para registro nuevo
-/*function abrirModalRegistro(bloqueId, dia, nombreDia) {
-    if (!semanaActual) return;
-    
-    const fecha = calcularFecha(semanaActual.fecha_inicio, dia);
-    const bloque = bloques.find(b => b.id === bloqueId);
-    
-    document.getElementById('bloqueSeleccionado').value = bloqueId;
-    document.getElementById('fechaSeleccionada').value = fecha;
-    document.getElementById('reservaId').value = '';
-    
-    // Configurar modal para nueva reserva
-    document.getElementById('tituloModalRegistro').textContent = 
-        `Registrar Uso - ${nombreDia} Bloque ${bloque.numero_bloque} (${bloque.hora_inicio} - ${bloque.hora_fin})`;
-    
-    document.getElementById('btnLiberar').style.display = 'none';
-    document.getElementById('formRegistro').reset();
-    
-    document.getElementById('modalRegistro').style.display = 'block';
-}
-
-// Abrir modal para edición
-function abrirModalEdicion(reserva, bloqueId, dia, nombreDia) {
-    if (!semanaActual) return;
-    
-    const bloque = bloques.find(b => b.id === bloqueId);
-    
-    document.getElementById('bloqueSeleccionado').value = bloqueId;
-    document.getElementById('fechaSeleccionada').value = reserva.fecha;
-    document.getElementById('reservaId').value = reserva.id;
-    
-    // Llenar formulario con datos existentes
-    document.getElementById('inputCurso').value = reserva.curso;
-    document.getElementById('inputProfesor').value = reserva.profesor;
-    document.getElementById('inputActividad').value = reserva.actividad || '';
-    document.getElementById('inputObservaciones').value = reserva.observaciones || '';
-    
-    // Configurar modal para edición
-    document.getElementById('tituloModalRegistro').textContent = 
-        `Editar Reserva - ${nombreDia} Bloque ${bloque.numero_bloque} (${bloque.hora_inicio} - ${bloque.hora_fin})`;
-    
-    document.getElementById('btnLiberar').style.display = 'inline-block';
-    
-    reservaSeleccionada = reserva;
-    document.getElementById('modalRegistro').style.display = 'block';
-}*/
 
 // En app-admin.js - MODIFICAR la función abrirModalRegistro
 function abrirModalRegistro(bloqueId, dia, nombreDia) {

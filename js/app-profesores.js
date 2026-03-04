@@ -32,7 +32,7 @@ async function cargarBloques() {
 // Cargar semanas
 async function cargarSemanas() {
     console.log('Cargando semanas...');
-    const { data, error } = await supabase
+    const { data, error } = await supabaseDB
         .from('semanas')
         .select('*')
         .order('fecha_inicio', { ascending: false });
@@ -80,7 +80,7 @@ async function cargarSemanas() {
 // Cargar reservas de una semana
 async function cargarReservasSemana(semanaId) {
     console.log('Cargando reservas para semana:', semanaId);
-    const { data, error } = await supabase
+    const { data, error } = await supabaseDB
         .from('reservas')
         .select('*')
         .eq('semana_id', semanaId);
@@ -347,7 +347,7 @@ document.getElementById('formRegistro').onsubmit = async function(e) {
     
     console.log('Creando nueva reserva:', reservaData);
     
-    const { error } = await supabase
+    const { error } = await supabaseDB
         .from('reservas')
         .insert([reservaData]);
     

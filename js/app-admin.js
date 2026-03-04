@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 // Cargar bloques horarios
 async function cargarBloques() {
     console.log('Cargando bloques horarios...');
-    const { data, error } = await supabase
+    const { data, error } = await supabaseDB
         .from('bloques')
         .select('*')
         .order('dia_semana')
@@ -41,7 +41,7 @@ async function cargarBloques() {
 // Cargar semanas
 async function cargarSemanas() {
     console.log('Cargando semanas...');
-    const { data, error } = await supabase
+    const { data, error } = await supabaseDB
         .from('semanas')
         .select('*')
         .order('fecha_inicio', { ascending: false });
@@ -103,7 +103,7 @@ async function cargarSemanas() {
 // Cargar reservas de una semana
 async function cargarReservasSemana(semanaId) {
     console.log('Cargando reservas para semana:', semanaId);
-    const { data, error } = await supabase
+    const { data, error } = await supabaseDB
         .from('reservas')
         .select('*')
         .eq('semana_id', semanaId);
@@ -496,14 +496,14 @@ document.getElementById('formRegistro').onsubmit = async function(e) {
     if (reservaId) {
         // Actualizar reserva existente
         console.log('Actualizando reserva:', reservaId, reservaData);
-        ({ error } = await supabase
+        ({ error } = await supabaseDB
             .from('reservas')
             .update(reservaData)
             .eq('id', reservaId));
     } else {
         // Crear nueva reserva
         console.log('Creando nueva reserva:', reservaData);
-        ({ error } = await supabase
+        ({ error } = await supabaseDB
             .from('reservas')
             .insert([reservaData]));
     }
@@ -533,7 +533,7 @@ async function liberarBloque() {
         '¿Estás seguro de que deseas liberar este bloque? Esta acción no se puede deshacer.',
         async () => {
             console.log('Eliminando reserva:', reservaId);
-            const { error } = await supabase
+            const { error } = await supabaseDB
                 .from('reservas')
                 .delete()
                 .eq('id', reservaId);
@@ -607,7 +607,7 @@ async function crearNuevaSemana(e) {
     
     console.log('Creando nueva semana:', nuevaSemana);
     
-    const { error } = await supabase
+    const { error } = await supabaseDB
         .from('semanas')
         .insert([nuevaSemana]);
     
@@ -652,7 +652,7 @@ async function guardarNotasSemana(e) {
     
     console.log('Actualizando notas de la semana:', semanaId, nuevasNotas);
     
-    const { error } = await supabase
+    const { error } = await supabaseDB
         .from('semanas')
         .update({ notas: nuevasNotas || null })
         .eq('id', semanaId);
@@ -683,7 +683,7 @@ async function eliminarNotasSemana() {
         async () => {
             console.log('Eliminando notas de la semana:', semanaId);
             
-            const { error } = await supabase
+            const { error } = await supabaseDB
                 .from('semanas')
                 .update({ notas: null })
                 .eq('id', semanaId);
@@ -708,7 +708,7 @@ async function eliminarNotasSemana() {
 
 // Validar semanas existentes
 async function validarSemanasExistentes() {
-    const { data: semanas, error } = await supabase
+    const { data: semanas, error } = await supabaseDB
         .from('semanas')
         .select('*');
     
@@ -734,7 +734,7 @@ async function validarSemanasExistentes() {
             const fechaInicioCorregida = obtenerLunesSemana(semana.fecha_inicio);
             const fechaFinCorregida = obtenerViernesSemana(fechaInicioCorregida);
             
-            const { error: updateError } = await supabase
+            const { error: updateError } = await supabaseDB
                 .from('semanas')
                 .update({
                     fecha_inicio: fechaInicioCorregida,
@@ -766,7 +766,7 @@ async function exportarDatos() {
     }
     
     // Obtener todas las reservas de la semana con información de bloques
-    const { data: reservasCompletas, error } = await supabase
+    const { data: reservasCompletas, error } = await supabaseDB
         .from('reservas')
         .select(`
             *,
@@ -868,7 +868,7 @@ async function exportarPDF() {
         mostrarExito('🔄 Generando PDF... Esto puede tomar unos segundos.');
         
         // Obtener datos completos de la semana
-        const { data: reservasCompletas, error } = await supabase
+        const { data: reservasCompletas, error } = await supabaseDB
             .from('reservas')
             .select(`
                 *,
@@ -1058,7 +1058,7 @@ async function exportarPDFProfesional() {
     try {
         mostrarExito('🔄 Generando PDF profesional...');
         
-        const { data: reservasCompletas, error } = await supabase
+        const { data: reservasCompletas, error } = await supabaseDB
             .from('reservas')
             .select(`
                 *,

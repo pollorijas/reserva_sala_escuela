@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('formNuevaSemana').onsubmit = crearNuevaSemana;
     document.getElementById('formEditarNotas').onsubmit = guardarNotasSemana;
     document.getElementById('btnEliminarNotas').onclick = eliminarNotasSemana;
+    document.getElementById('btnLiberar').onclick = liberarBloque;
     
     // Validar semanas existentes (para corregir fechas si es necesario)
     setTimeout(validarSemanasExistentes, 2000);
@@ -856,7 +857,7 @@ window.onclick = function(event) {
 }
 
 // Asignar eventos a los botones
-document.getElementById('btnLiberar').onclick = liberarBloque;
+//document.getElementById('btnLiberar').onclick = liberarBloque;
 
 // Función para exportar semana como PDF
 async function exportarPDF() {

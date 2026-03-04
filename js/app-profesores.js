@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 // Cargar bloques horarios
 async function cargarBloques() {
     console.log('Cargando bloques horarios...');
-    const { data, error } = await supabase
+    const { data, error } = await supabaseDB
         .from('bloques')
         .select('*')
         .order('dia_semana')

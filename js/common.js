@@ -1,9 +1,9 @@
 // Configuración de Supabase - REEMPLAZA CON TUS CREDENCIALES
 
-//const supabaseUrl = 'https://iuspypmzrwzlqolbkjhl.supabase.co';
-const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
-//const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1c3B5cG16cnd6bHFvbGJramhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1OTA5NDIsImV4cCI6MjA3NjE2Njk0Mn0.da86H7bm7lZ5T66qaNyjl1iflQ1xN-iy_5wanhdLzHE';
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabaseUrl = 'https://iuspypmzrwzlqolbkjhl.supabase.co';
+//const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1c3B5cG16cnd6bHFvbGJramhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1OTA5NDIsImV4cCI6MjA3NjE2Njk0Mn0.da86H7bm7lZ5T66qaNyjl1iflQ1xN-iy_5wanhdLzHE';
+//const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabaseDB = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 //import { createClient } from "@supabase/supabase-js";

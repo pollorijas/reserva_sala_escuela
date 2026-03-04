@@ -6,14 +6,6 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 //const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabaseDB = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-//import { createClient } from "@supabase/supabase-js";
-/*const { createClient } = require("@supabase/supabase-js");
-
-const supabaseDB = createClient(
-  process.env.SUPABASE_DATABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);*/
-
 // Funciones comunes para ambas versiones
 
 // En common.js - REEMPLAZAR la función formatearFechaCorta

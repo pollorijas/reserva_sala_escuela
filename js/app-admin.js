@@ -88,6 +88,8 @@ async function cargarSemanas() {
 
         // Actualizar la variable global
         semanaActual = semanaActualEncontrada;
+        console.log('Semana Actual: ', semanaActual.fecha_inicio);
+        await cargarReservasSemana(semanaActual.id);
 
     }
     

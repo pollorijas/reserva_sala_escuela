@@ -64,8 +64,24 @@ async function cargarSemanas() {
             select.appendChild(option);
         });
         
-        semanaActual = data[0];
+        //semanaActual = data[0];
+        //await cargarReservasSemana(semanaActual.id);
+        // Determinar la semana actual basada en la fecha de hoy
+        const hoyStr = new Date().toISOString().split('T')[0]; // formato YYYY-MM-DD
+        let semanaActualEncontrada = data.find(semana => 
+            semana.fecha_inicio <= hoyStr && semana.fecha_fin >= hoyStr
+        );
+        
+        // Si no hay semana que contenga hoy, usar la primera (más reciente)
+        if (!semanaActualEncontrada) {
+            semanaActualEncontrada = data[0];
+        }
+
+        // Actualizar la variable global
+        semanaActual = semanaActualEncontrada;
+        console.log('Semana Actual: ', semanaActual.fecha_inicio);
         await cargarReservasSemana(semanaActual.id);
+
     }
     
     select.onchange = async function() {

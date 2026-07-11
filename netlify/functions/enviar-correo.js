@@ -7,10 +7,23 @@
 // Variables de entorno requeridas (configurar en Netlify:
 // Site settings → Environment variables):
 //   RESEND_API_KEY  - API key de Resend (obligatoria)
+//   ADMIN_PASSWORD  - contraseña de administrador (obligatoria);
+//                     evita que terceros usen la cuota de correo
 //   EMAIL_FROM      - Remitente verificado, ej: "sala@tuescuela.cl"
 //                     (opcional; por defecto usa onboarding@resend.dev,
 //                     que solo permite enviar al dueño de la cuenta)
 // ============================================================
+
+const crypto = require('crypto');
+
+// Comparación en tiempo constante (misma lógica que admin-api.js)
+function claveValida(entregada) {
+    const esperada = process.env.ADMIN_PASSWORD || '';
+    if (!esperada || !entregada) return false;
+    const a = crypto.createHash('sha256').update(String(entregada)).digest();
+    const b = crypto.createHash('sha256').update(esperada).digest();
+    return crypto.timingSafeEqual(a, b);
+}
 
 const CABECERAS = {
     'Content-Type': 'application/json',
@@ -106,6 +119,12 @@ exports.handler = async (event) => {
         });
     }
 
+    if (!process.env.ADMIN_PASSWORD) {
+        return respuesta(500, {
+            error: 'Falta la variable de entorno ADMIN_PASSWORD en Netlify (requerida para proteger el envío de correos).'
+        });
+    }
+
     let datos;
     try {
         datos = JSON.parse(event.body || '{}');
@@ -113,7 +132,11 @@ exports.handler = async (event) => {
         return respuesta(400, { error: 'El cuerpo de la solicitud no es JSON válido.' });
     }
 
-    const { para, profesor, semana, reservas, mensaje } = datos;
+    const { clave, para, profesor, semana, reservas, mensaje } = datos;
+
+    if (!claveValida(clave)) {
+        return respuesta(401, { error: 'Contraseña de administrador incorrecta.' });
+    }
 
     if (!para || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(para)) {
         return respuesta(400, { error: 'Correo electrónico de destino inválido.' });

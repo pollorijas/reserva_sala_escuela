@@ -245,6 +245,8 @@ function abrirModalEdicion(reserva, bloque, dia, nombreDia) {
 }
 
 // Guardar reserva (nueva o edición)
+// La creación usa la inserción pública (igual que los profesores);
+// la edición requiere la sesión de administrador (admin-api).
 document.getElementById('formRegistro').onsubmit = async function(e) {
     e.preventDefault();
 
@@ -259,26 +261,26 @@ document.getElementById('formRegistro').onsubmit = async function(e) {
         fecha: document.getElementById('fechaSeleccionada').value
     };
 
-    let error;
+    try {
+        if (reservaId) {
+            await llamarAdminAPI('actualizarReserva', { id: parseInt(reservaId), ...reservaData });
+        } else {
+            const { error } = await supabaseDB
+                .from('reservas')
+                .insert([reservaData]);
+            if (error) {
+                throw new Error(error.code === '23505'
+                    ? 'Ese bloque ya tiene una reserva en esa fecha.'
+                    : error.message);
+            }
+        }
 
-    if (reservaId) {
-        ({ error } = await supabaseDB
-            .from('reservas')
-            .update(reservaData)
-            .eq('id', reservaId));
-    } else {
-        ({ error } = await supabaseDB
-            .from('reservas')
-            .insert([reservaData]));
-    }
-
-    if (error) {
-        console.error('Error guardando reserva:', error);
-        mostrarError('Error al guardar: ' + error.message);
-    } else {
         cerrarModal();
         await cargarReservasSemana(semanaActual.id);
         mostrarExito(reservaId ? 'Reserva actualizada exitosamente' : 'Registro guardado exitosamente');
+    } catch (error) {
+        console.error('Error guardando reserva:', error);
+        mostrarError('Error al guardar: ' + error.message);
     }
 };
 
@@ -295,20 +297,16 @@ async function liberarBloque() {
         'Liberar Bloque',
         '¿Estás seguro de que deseas liberar este bloque? Esta acción no se puede deshacer.',
         async () => {
-            const { error } = await supabaseDB
-                .from('reservas')
-                .delete()
-                .eq('id', reservaId);
-
             cerrarModalConfirmacion();
 
-            if (error) {
-                console.error('Error eliminando reserva:', error);
-                mostrarError('Error al liberar bloque: ' + error.message);
-            } else {
+            try {
+                await llamarAdminAPI('eliminarReserva', { id: parseInt(reservaId) });
                 cerrarModal();
                 await cargarReservasSemana(semanaActual.id);
                 mostrarExito('Bloque liberado exitosamente');
+            } catch (error) {
+                console.error('Error eliminando reserva:', error);
+                mostrarError('Error al liberar bloque: ' + error.message);
             }
         }
     );
@@ -363,17 +361,14 @@ async function crearNuevaSemana(e) {
         notas: notas || null
     };
 
-    const { error } = await supabaseDB
-        .from('semanas')
-        .insert([nuevaSemana]);
-
-    if (error) {
-        console.error('Error creando semana:', error);
-        mostrarError('Error creando semana: ' + error.message);
-    } else {
+    try {
+        await llamarAdminAPI('crearSemana', nuevaSemana);
         cerrarModalNuevaSemana();
         await cargarSemanas();
         mostrarExito('Semana creada exitosamente');
+    } catch (error) {
+        console.error('Error creando semana:', error);
+        mostrarError('Error creando semana: ' + error.message);
     }
 }
 
@@ -404,19 +399,15 @@ async function guardarNotasSemana(e) {
     const semanaId = document.getElementById('semanaIdEditar').value;
     const nuevasNotas = document.getElementById('inputNotasEditar').value.trim();
 
-    const { error } = await supabaseDB
-        .from('semanas')
-        .update({ notas: nuevasNotas || null })
-        .eq('id', semanaId);
-
-    if (error) {
-        console.error('Error actualizando notas:', error);
-        mostrarError('Error al actualizar notas: ' + error.message);
-    } else {
+    try {
+        await llamarAdminAPI('actualizarNotas', { id: parseInt(semanaId), notas: nuevasNotas || null });
         cerrarModalEditarNotas();
         semanaActual.notas = nuevasNotas || null;
         await cargarReservasSemana(semanaActual.id);
         mostrarExito('Notas actualizadas exitosamente');
+    } catch (error) {
+        console.error('Error actualizando notas:', error);
+        mostrarError('Error al actualizar notas: ' + error.message);
     }
 }
 
@@ -428,28 +419,28 @@ async function eliminarNotasSemana() {
         'Eliminar Notas',
         '¿Estás seguro de que deseas eliminar todas las notas de esta semana?',
         async () => {
-            const { error } = await supabaseDB
-                .from('semanas')
-                .update({ notas: null })
-                .eq('id', semanaId);
-
             cerrarModalConfirmacion();
 
-            if (error) {
-                console.error('Error eliminando notas:', error);
-                mostrarError('Error al eliminar notas: ' + error.message);
-            } else {
+            try {
+                await llamarAdminAPI('actualizarNotas', { id: parseInt(semanaId), notas: null });
                 cerrarModalEditarNotas();
                 semanaActual.notas = null;
                 await cargarReservasSemana(semanaActual.id);
                 mostrarExito('Notas eliminadas exitosamente');
+            } catch (error) {
+                console.error('Error eliminando notas:', error);
+                mostrarError('Error al eliminar notas: ' + error.message);
             }
         }
     );
 }
 
-// Validar que las semanas existentes empiecen en lunes
+// Validar que las semanas existentes empiecen en lunes.
+// Requiere sesión de administrador; si aún no se ha ingresado la
+// contraseña, simplemente se omite (se reintenta al recargar).
 async function validarSemanasExistentes() {
+    if (!obtenerClaveAdmin()) return;
+
     const { data: semanas, error } = await supabaseDB
         .from('semanas')
         .select('*');
@@ -469,15 +460,16 @@ async function validarSemanasExistentes() {
             const fechaInicioCorregida = obtenerLunesSemana(semana.fecha_inicio);
             const fechaFinCorregida = obtenerViernesSemana(fechaInicioCorregida);
 
-            const { error: updateError } = await supabaseDB
-                .from('semanas')
-                .update({
+            try {
+                await llamarAdminAPI('actualizarSemana', {
+                    id: semana.id,
                     fecha_inicio: fechaInicioCorregida,
                     fecha_fin: fechaFinCorregida
-                })
-                .eq('id', semana.id);
-
-            if (!updateError) semanasCorregidas++;
+                });
+                semanasCorregidas++;
+            } catch (updateError) {
+                console.error('Error corrigiendo semana:', updateError);
+            }
         }
     }
 

@@ -12,7 +12,10 @@ Sistema web para gestión de uso de salas educativas con dos interfaces:
 - `js/exportar.js` - Exportación CSV y PDF del horario semanal (admin)
 - `js/correo.js` - Notificación de horarios por correo a profesores (admin)
 - `js/informe.js` - Informe estadístico de uso con descarga en PDF (admin)
+- `js/admin-api.js` - Sesión de administrador y comunicación con la API protegida
+- `netlify/functions/admin-api.js` - Función serverless con las operaciones de administrador
 - `netlify/functions/enviar-correo.js` - Función serverless que envía los correos
+- `db/seguridad.sql` - Script de seguridad para Supabase (RLS + restricción de duplicados)
 
 ## Características
 
@@ -35,6 +38,34 @@ Sistema web para gestión de uso de salas educativas con dos interfaces:
 - En móviles el horario se muestra como tarjetas por día (pestañas Lun-Vie), optimizado al tacto
 - Notificaciones no bloqueantes (toasts) en lugar de alertas
 
+## Seguridad
+
+El sistema usa dos niveles de acceso **sin pedir login a los profesores**:
+
+- **Profesores (sin contraseña):** el navegador usa la clave pública (anon) de
+  Supabase, que con Row Level Security activo solo puede **leer** los datos y
+  **crear reservas**. Nada más.
+- **Administradores (con contraseña):** editar/liberar reservas, crear semanas,
+  editar notas y enviar correos pasan por funciones de Netlify que validan la
+  contraseña (`ADMIN_PASSWORD`) y usan la clave `service_role` de Supabase,
+  que nunca llega al navegador. La contraseña se pide una vez al abrir
+  `admin.html` y dura mientras la pestaña esté abierta.
+
+### Activar la seguridad (una sola vez)
+
+1. **Supabase**: abrir *SQL Editor*, pegar el contenido de `db/seguridad.sql`
+   y ejecutarlo. Esto activa RLS y agrega la restricción que impide reservar
+   dos veces el mismo bloque.
+2. **Netlify**: en *Site settings → Environment variables* agregar:
+   - `ADMIN_PASSWORD` = contraseña que usará el administrador
+   - `SUPABASE_SERVICE_ROLE_KEY` = clave `service_role` del proyecto
+     (Supabase: *Settings → API keys*; **nunca** ponerla en el código)
+3. Volver a desplegar el sitio.
+
+> ⚠️ Si se ejecuta el SQL sin configurar las variables en Netlify, la página
+> de profesores sigue funcionando normalmente, pero las acciones de
+> administrador quedarán bloqueadas hasta completar el paso 2.
+
 ## Configuración
 
 1. Reemplazar credenciales de Supabase en `js/common.js` (líneas 4-5).
@@ -44,7 +75,9 @@ Sistema web para gestión de uso de salas educativas con dos interfaces:
    - `bloques`
    - `reservas`
 
-3. Desplegar en Netlify.
+3. Ejecutar `db/seguridad.sql` en Supabase (ver sección Seguridad).
+
+4. Desplegar en Netlify y configurar las variables de entorno.
 
 ### Envío de correos (Resend)
 
@@ -54,6 +87,8 @@ con la API de [Resend](https://resend.com). Para activarlo:
 1. Crear una cuenta gratuita en Resend y generar una API key.
 2. En Netlify: **Site settings → Environment variables**, agregar:
    - `RESEND_API_KEY` = la API key de Resend (obligatoria)
+   - `ADMIN_PASSWORD` = contraseña de administrador (obligatoria; el envío
+     de correos la exige para que terceros no usen la cuota de la cuenta)
    - `EMAIL_FROM` = remitente verificado, ej. `sala@tuescuela.cl` (opcional)
 3. Volver a desplegar el sitio.
 

@@ -109,6 +109,11 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        if (!obtenerClaveAdmin()) {
+            mostrarLoginAdmin('Debe iniciar sesión como administrador para enviar correos.');
+            return;
+        }
+
         const btnEnviar = document.getElementById('btnEnviarCorreo');
         btnEnviar.disabled = true;
         btnEnviar.textContent = 'Enviando...';
@@ -118,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    clave: obtenerClaveAdmin(),
                     para: correo,
                     profesor: profesor,
                     mensaje: mensaje,

@@ -41,6 +41,15 @@ async function exportarDatos() {
     mostrarExito('Archivo CSV descargado');
 }
 
+// Recorta un texto respetando palabras completas, para que no
+// se corte una palabra a la mitad dentro de la celda del PDF.
+function truncarPorPalabras(texto, maxLength) {
+    if (!texto || texto.length <= maxLength) return texto || '';
+    const recorte = texto.substring(0, maxLength);
+    const ultimoEspacio = recorte.lastIndexOf(' ');
+    return (ultimoEspacio > maxLength * 0.6 ? recorte.substring(0, ultimoEspacio) : recorte) + '…';
+}
+
 // ============================================================
 // PDF del horario semanal
 // Réplica del horario web: bloques disponibles en verde y
@@ -121,12 +130,13 @@ async function exportarPDFSemana() {
                 const reserva = reservasSemana.find(r => r.bloque_id === bloque.id && r.fecha === fecha);
 
                 if (reserva) {
-                    let texto = `${reserva.curso}\n${reserva.profesor}`;
+                    // Se deja bastante margen (150 caracteres) porque la celda usa
+                    // fuente reducida y ajuste de línea automático (ver autoTable
+                    // más abajo); el recorte solo actúa como resguardo ante textos
+                    // extremadamente largos.
+                    let texto = `${truncarPorPalabras(reserva.curso, 60)}\n${truncarPorPalabras(reserva.profesor, 60)}`;
                     if (reserva.actividad) {
-                        const actividad = reserva.actividad.length > 40
-                            ? reserva.actividad.substring(0, 38) + '…'
-                            : reserva.actividad;
-                        texto += `\n${actividad}`;
+                        texto += `\n${truncarPorPalabras(reserva.actividad, 150)}`;
                     }
                     fila.push(texto);
                     filaEstados.push('ocupado');
@@ -148,18 +158,25 @@ async function exportarPDFSemana() {
             theme: 'grid',
             styles: {
                 fontSize: 8,
-                cellPadding: 2.5,
+                cellPadding: 1.8,
                 valign: 'middle',
                 halign: 'center',
                 lineColor: [203, 213, 225],
                 lineWidth: 0.2,
-                textColor: [31, 41, 55]
+                textColor: [31, 41, 55],
+                overflow: 'linebreak'
             },
             headStyles: {
                 fillColor: [51, 65, 92],
                 textColor: [255, 255, 255],
                 fontStyle: 'bold',
                 fontSize: 9
+            },
+            // Altura mínima uniforme para que todas las filas se vean del
+            // mismo tamaño; las celdas ocupadas usan fuente más chica para
+            // que curso + profesor + actividad quepan sin cortarse.
+            bodyStyles: {
+                minCellHeight: 15
             },
             columnStyles: {
                 0: { fontStyle: 'bold', fillColor: [241, 245, 249], cellWidth: 38 }
@@ -176,6 +193,8 @@ async function exportarPDFSemana() {
                 } else if (estado === 'ocupado') {
                     data.cell.styles.fillColor = [253, 243, 227];
                     data.cell.styles.halign = 'left';
+                    data.cell.styles.fontSize = 6.5;
+                    data.cell.styles.cellPadding = { top: 1.5, right: 2, bottom: 1.5, left: 2 };
                 } else if (estado === 'na') {
                     data.cell.styles.fillColor = [248, 250, 252];
                     data.cell.styles.textColor = [176, 184, 196];

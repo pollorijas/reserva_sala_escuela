@@ -1,214 +1,115 @@
+/* ============================================================
+   Ajustes para dispositivos móviles y tablets
+   En pantallas pequeñas la tabla se reemplaza por la vista de
+   tarjetas por día (.vista-movil), mucho más cómoda al tacto.
+   ============================================================ */
+
 @media (max-width: 768px) {
-    .container {
-        padding: 10px 5px;
+    /* Ocultar la tabla y mostrar las tarjetas */
+    #tabla-container {
+        display: none;
     }
 
-    h1 {
-        font-size: 1.4rem;
-        margin-bottom: 15px;
-        padding: 0 10px;
+    .vista-movil {
+        display: block;
     }
 
+    /* Selector de semanas más compacto */
     .semana-selector {
+        padding: 12px;
+    }
+
+    .selector-flecha {
+        flex-basis: 40px;
+    }
+
+    .chip-semana {
+        min-width: 118px;
+        padding: 6px 12px;
+    }
+
+    .acciones-admin button {
+        flex: 1 1 calc(50% - 5px);
+        font-size: 13px;
+        padding: 10px 8px;
+    }
+
+    /* Información de la semana */
+    .info-semana {
+        padding: 15px;
+    }
+
+    .info-semana-header {
         flex-direction: column;
         align-items: stretch;
-        padding: 15px;
-        gap: 10px;
-    }
-
-    .semana-selector label {
-        text-align: center;
-        font-size: 1.1rem;
-    }
-
-    .semana-selector select {
-        min-width: auto;
-        width: 100%;
-        font-size: 16px;
-        padding: 12px;
-    }
-
-    .semana-selector button {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-    }
-
-    #tabla-container {
-        overflow-x: auto;
-        margin: 0 -5px;
-        padding: 0 5px;
-    }
-
-    .tabla-horarios {
-        min-width: 800px;
-        font-size: 14px;
-    }
-
-    .tabla-horarios th,
-    .tabla-horarios td {
-        padding: 8px 4px;
-        font-size: 12px;
-    }
-
-    .modal-content {
-        width: 95%;
-        min-width: auto;
-        margin: 10% auto;
-        padding: 20px 15px;
-        max-height: 85vh;
-        overflow-y: auto;
-    }
-
-    .form-buttons {
-        flex-direction: column;
-    }
-
-    .form-buttons button {
-        width: 100%;
-        margin-bottom: 10px;
-        padding: 12px;
-    }
-
-    button, 
-    .bloque-libre, 
-    .bloque-ocupado {
-        min-height: 44px;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        font-size: 16px;
-        padding: 12px;
-    }
-
-    .info-semana {
-        padding: 12px;
-        margin-bottom: 15px;
-    }
-
-    .info-semana h3 {
-        font-size: 1.2rem;
-    }
-
-    .info-semana p {
-        font-size: 0.9rem;
-    }
-
-    .btn-editar-notas {
-        width: 100%;
-        margin-top: 10px;
-    }
-
-    #modalEditarNotas .modal-content {
-        width: 95%;
-        min-width: auto;
-    }
-
-    .info-semana-modal {
-        padding: 10px;
-        font-size: 14px;
-    }
-
-    #formEditarNotas .form-buttons {
-        flex-direction: column;
-    }
-
-    #formEditarNotas .form-buttons button {
-        width: 100%;
-        margin-bottom: 8px;
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
-        padding: 5px;
-    }
-
-    h1 {
-        font-size: 1.2rem;
-    }
-
-    .tabla-horarios {
-        min-width: 700px;
-        font-size: 12px;
-    }
-
-    .tabla-horarios th,
-    .tabla-horarios td {
-        padding: 6px 3px;
-    }
-
-    .modal-content {
-        width: 98%;
-        padding: 15px 10px;
-    }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-    .container {
-        padding: 15px;
-    }
-
-    .tabla-horarios {
-        font-size: 13px;
-    }
-}
-/* En mobile.css - Solo ajustes específicos para móvil */
-@media (max-width: 768px) {
-    .info-semana {
-        padding: 15px;
-    }
-    
-    .info-semana-header {
         gap: 12px;
     }
-    
+
+    .info-semana-estadisticas {
+        width: 100%;
+    }
+
     .info-semana-titulo h3 {
         font-size: 1.1rem;
     }
-    
-    .info-semana-titulo p {
-        font-size: 0.9rem;
-    }
-    
+
     .porcentaje-ocupacion {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
     }
-    
+
     .info-semana-detalles {
         grid-template-columns: repeat(2, 1fr);
         gap: 8px;
     }
-    
+
     .detalle-card {
-        padding: 8px;
+        padding: 9px;
     }
-    
+
     .detalle-card .valor {
         font-size: 0.95rem;
     }
-    
+
     .detalle-card .etiqueta {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
     }
-    
-    .notas-semana-container {
-        padding: 12px;
-    }
-    
+
     .info-semana.admin .btn-editar-notas {
         width: 100%;
-        margin-top: 8px;
+    }
+
+    /* Informe */
+    .informe-grilla {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tabla-informe {
+        font-size: 0.8rem;
     }
 }
 
 @media (max-width: 480px) {
     .info-semana-detalles {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
-    
-    .detalles-estadistica {
-        grid-template-columns: 1fr 1fr;
+
+    .chip-semana {
+        min-width: 108px;
+    }
+
+    .acciones-admin button {
+        flex: 1 1 100%;
+    }
+}
+
+/* En tablets medianas la tabla sigue visible pero más compacta */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .tabla-horarios {
+        font-size: 13px;
+    }
+
+    .tabla-horarios th,
+    .tabla-horarios td {
+        padding: 8px 6px;
     }
 }

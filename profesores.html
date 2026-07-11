@@ -17,15 +17,18 @@
         </div>
         
         <div class="semana-selector">
-            <label for="selectSemana">Seleccionar Semana:</label>
-            <select id="selectSemana">
-                <option value="">Cargando semanas...</option>
-            </select>
+            <span class="titulo-selector">📅 Seleccionar semana</span>
+            <div id="selectorSemanas">
+                <p class="helper-text">Cargando semanas...</p>
+            </div>
         </div>
 
         <div class="info-semana" id="infoSemana">
             <!-- Información de la semana actual -->
         </div>
+
+        <!-- Vista de tarjetas para móviles (se llena dinámicamente) -->
+        <div class="vista-movil" id="vistaMovil"></div>
 
         <div id="tabla-container">
             <table class="tabla-horarios" id="tablaHorarios">

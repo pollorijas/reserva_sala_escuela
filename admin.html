@@ -20,18 +20,25 @@
         </div>
         
         <div class="semana-selector">
-            <label for="selectSemana">Seleccionar Semana:</label>
-            <select id="selectSemana">
-                <option value="">Cargando semanas...</option>
-            </select>
-            <button onclick="abrirModalNuevaSemana()" class="btn-primary">Nueva Semana</button>
-            <button onclick="exportarDatos()" class="btn-success">Exportar Datos</button>
-            <button onclick="exportarPDFProfesional()" class="btn-warning">📄 Exportar PDF</button>
+            <span class="titulo-selector">📅 Seleccionar semana</span>
+            <div id="selectorSemanas">
+                <p class="helper-text">Cargando semanas...</p>
+            </div>
+            <div class="acciones-admin">
+                <button onclick="abrirModalNuevaSemana()" class="btn-primary">➕ Nueva Semana</button>
+                <button onclick="exportarDatos()" class="btn-success">📥 Exportar CSV</button>
+                <button onclick="exportarPDFSemana()" class="btn-warning">📄 Exportar PDF</button>
+                <button onclick="abrirModalCorreo()" class="btn-primary">📧 Notificar Profesor</button>
+                <button onclick="abrirModalInforme()" class="btn-secondary">📊 Informe de Uso</button>
+            </div>
         </div>
 
         <div class="info-semana" id="infoSemana">
             <!-- Información de la semana actual -->
         </div>
+
+        <!-- Vista de tarjetas para móviles (se llena dinámicamente) -->
+        <div class="vista-movil" id="vistaMovil"></div>
 
         <div id="tabla-container">
             <table class="tabla-horarios" id="tablaHorarios">
@@ -157,6 +164,61 @@
         </div>
     </div>
 
+    <!-- Modal para enviar correo a un profesor -->
+    <div id="modalCorreo" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalCorreo()">&times;</span>
+            <h3>📧 Notificar horarios a un profesor</h3>
+            <form id="formCorreo">
+                <div class="form-group">
+                    <label for="selectProfesorCorreo">Profesor:</label>
+                    <select id="selectProfesorCorreo" required>
+                        <option value="">Seleccione un profesor</option>
+                    </select>
+                    <div class="helper-text">
+                        Se listan los profesores con reservas en la semana seleccionada
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputCorreoProfesor">Correo electrónico:</label>
+                    <input type="email" id="inputCorreoProfesor" required
+                        placeholder="profesor@escuela.cl" autocomplete="email">
+                </div>
+
+                <div class="resumen-correo" id="resumenCorreo">
+                    Seleccione un profesor para ver el resumen de sus reservas.
+                </div>
+
+                <div class="form-group">
+                    <label for="inputMensajeCorreo">Mensaje adicional (opcional):</label>
+                    <textarea id="inputMensajeCorreo"
+                        placeholder="Ej: Recuerde llegar 5 minutos antes para encender los equipos..."></textarea>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary" id="btnEnviarCorreo">Enviar Correo</button>
+                    <button type="button" onclick="cerrarModalCorreo()" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de informe estadístico -->
+    <div id="modalInforme" class="modal">
+        <div class="modal-content modal-informe">
+            <span class="close" onclick="cerrarModalInforme()">&times;</span>
+            <h3>📊 Informe de uso de la sala</h3>
+            <div id="contenidoInforme">
+                <p class="helper-text">Cargando estadísticas...</p>
+            </div>
+            <div class="form-buttons">
+                <button type="button" onclick="descargarInformePDF()" class="btn-warning">📄 Descargar PDF</button>
+                <button type="button" onclick="cerrarModalInforme()" class="btn-secondary">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de confirmación -->
     <div id="modalConfirmacion" class="modal">
         <div class="modal-content confirmacion">
@@ -172,6 +234,9 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="js/common.js"></script>
     <script src="js/app-admin.js"></script>
+    <script src="js/exportar.js"></script>
+    <script src="js/correo.js"></script>
+    <script src="js/informe.js"></script>
 
 </body>
 </html>

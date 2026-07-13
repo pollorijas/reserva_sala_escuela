@@ -590,6 +590,11 @@ function calcularOcupacionPorDia(bloques, reservas, semana) {
 // ============================================================
 // Cursos
 // ============================================================
+
+// Opciones adicionales que solo ve el administrador (bloqueos de
+// sala por mantención, actividades internas, feriados, etc.)
+const CURSOS_ADMINISTRATIVOS = ['Mantención', 'UTP', 'Senda Previene', 'Feriado', 'Vacaciones'];
+
 function generarOpcionesCursos() {
     const cursos = [];
     const letras = ['A', 'B'];
@@ -606,22 +611,30 @@ function generarOpcionesCursos() {
     return cursos;
 }
 
-function cargarCursosEnSelect(selectElement, cursoSeleccionado = '') {
-    const cursos = generarOpcionesCursos();
-
+function cargarCursosEnSelect(selectElement, cursoSeleccionado = '', incluirAdministrativos = false) {
     selectElement.innerHTML = '<option value="">Seleccione un curso</option>';
 
-    cursos.forEach(curso => {
+    const crearOpcion = (valor) => {
         const option = document.createElement('option');
-        option.value = curso.valor;
-        option.textContent = curso.texto;
-
-        if (cursoSeleccionado && curso.valor === cursoSeleccionado) {
+        option.value = valor;
+        option.textContent = valor;
+        if (cursoSeleccionado && valor === cursoSeleccionado) {
             option.selected = true;
         }
+        return option;
+    };
 
-        selectElement.appendChild(option);
-    });
+    const grupoCursos = document.createElement('optgroup');
+    grupoCursos.label = 'Cursos';
+    generarOpcionesCursos().forEach(curso => grupoCursos.appendChild(crearOpcion(curso.valor)));
+    selectElement.appendChild(grupoCursos);
+
+    if (incluirAdministrativos) {
+        const grupoAdmin = document.createElement('optgroup');
+        grupoAdmin.label = 'Uso administrativo';
+        CURSOS_ADMINISTRATIVOS.forEach(nombre => grupoAdmin.appendChild(crearOpcion(nombre)));
+        selectElement.appendChild(grupoAdmin);
+    }
 }
 
 function inicializarSelectsCursos() {

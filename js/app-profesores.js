@@ -1,16 +1,37 @@
-// Variables globales para profesores
+// ============================================================
+// Aplicación de profesores
+//
+// Secciones de este archivo:
+//   1. Estado global
+//   2. Inicialización
+//   3. Carga de datos (bloques, semanas, reservas)
+//   4. Panel de información de la semana
+//   5. Reservas (registrar en bloques libres, ver ocupados)
+//   6. Modales
+//
+// Los profesores no inician sesión: solo pueden leer datos y
+// crear reservas (permisos definidos por RLS en Supabase).
+// ============================================================
+
+// ============================================================
+// 1. Estado global
+// ============================================================
 let semanaActual = null;
 let bloques = [];
 let reservas = [];
 
-// Inicialización
+// ============================================================
+// 2. Inicialización
+// ============================================================
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Inicializando aplicación para profesores...');
     await cargarBloques();
     await cargarSemanas();
 });
 
-// Cargar bloques horarios
+// ============================================================
+// 3. Carga de datos
+// ============================================================
 async function cargarBloques() {
     const { data, error } = await supabaseDB
         .from('bloques')
@@ -92,7 +113,9 @@ async function cargarReservasSemana(semanaId) {
     actualizarInfoSemana();
 }
 
-// Información de la semana
+// ============================================================
+// 4. Panel de información de la semana
+// ============================================================
 function actualizarInfoSemana() {
     const infoContainer = document.getElementById('infoSemana');
     if (!semanaActual) {
@@ -147,6 +170,10 @@ function actualizarInfoSemana() {
         </div>
     `;
 }
+
+// ============================================================
+// 5. Reservas
+// ============================================================
 
 // Abrir modal de registro (bloque libre)
 function abrirModalRegistro(bloque, dia, nombreDia) {
@@ -222,7 +249,9 @@ document.getElementById('formRegistro').onsubmit = async function(e) {
     }
 };
 
-// Funciones para cerrar modales
+// ============================================================
+// 6. Modales
+// ============================================================
 function cerrarModal() {
     document.getElementById('modalRegistro').style.display = 'none';
     document.getElementById('formRegistro').reset();
@@ -232,11 +261,10 @@ function cerrarModalSoloLectura() {
     document.getElementById('modalSoloLectura').style.display = 'none';
 }
 
-// Cerrar modales al hacer click fuera
+// Click fuera de un modal: SOLO cierra el de información (es de
+// solo lectura). El formulario de reserva se cierra únicamente con
+// sus botones, para no perder lo escrito por un click accidental.
 window.onclick = function(event) {
-    const modalRegistro = document.getElementById('modalRegistro');
     const modalSoloLectura = document.getElementById('modalSoloLectura');
-
-    if (event.target === modalRegistro) cerrarModal();
     if (event.target === modalSoloLectura) cerrarModalSoloLectura();
 };

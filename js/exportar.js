@@ -4,6 +4,18 @@
 // semanaActual, bloques
 // ============================================================
 
+// Convierte un valor en una celda CSV segura:
+//  - las comillas dobles se duplican ("") como exige el formato, para
+//    que un texto con comillas no desplace las columnas siguientes
+//  - si empieza con = + - @ (o tabulación / retorno), Excel y otras
+//    planillas lo interpretarían como una fórmula (p. ej. =HYPERLINK(...)),
+//    así que se antepone un apóstrofe para que se muestre como texto
+function escaparCeldaCSV(valor) {
+    let texto = valor === null || valor === undefined ? '' : String(valor);
+    if (/^[=+\-@\t\r]/.test(texto)) texto = "'" + texto;
+    return '"' + texto.replace(/"/g, '""') + '"';
+}
+
 // Exportar reservas de la semana como CSV
 async function exportarDatos() {
     if (!semanaActual) {
@@ -27,7 +39,16 @@ async function exportarDatos() {
         const fecha = new Date(reserva.fecha + 'T12:00:00-03:00');
         const diaSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][fecha.getDay()];
 
-        csv += `"${diaSemana}","${reserva.fecha}","${reserva.bloques.numero_bloque}","${reserva.bloques.hora_inicio} - ${reserva.bloques.hora_fin}","${reserva.curso}","${reserva.profesor}","${reserva.actividad || ''}","${reserva.observaciones || ''}"\n`;
+        csv += [
+            diaSemana,
+            reserva.fecha,
+            reserva.bloques.numero_bloque,
+            `${reserva.bloques.hora_inicio} - ${reserva.bloques.hora_fin}`,
+            reserva.curso,
+            reserva.profesor,
+            reserva.actividad,
+            reserva.observaciones
+        ].map(escaparCeldaCSV).join(',') + '\n';
     });
 
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });

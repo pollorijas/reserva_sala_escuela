@@ -215,15 +215,18 @@ function actualizarInfoSemana() {
                 <span class="icono">📌</span>
                 <span>Información importante</span>
             </div>
-            <div class="notas-semana-contenido">
-                ${semanaActual.notas ? semanaActual.notas : 'No hay notas específicas. Click en "Editar Notas" para agregar información importante.'}
-            </div>
+            <div class="notas-semana-contenido" id="notasSemanaContenido"></div>
         </div>
 
         <div class="zona-horaria-info">
             📍 Chile - ${formatearFechaCorta(new Date())}
         </div>
     `;
+
+    // Las notas se asignan como texto (no como HTML) para que ningún
+    // carácter como "<" se interprete como una etiqueta
+    document.getElementById('notasSemanaContenido').textContent = semanaActual.notas ||
+        'No hay notas específicas. Click en "Editar Notas" para agregar información importante.';
 }
 
 // ============================================================

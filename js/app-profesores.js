@@ -158,7 +158,7 @@ function actualizarInfoSemana() {
                 <span class="icono">📌</span>
                 <span>Información importante</span>
             </div>
-            <div class="notas-semana-contenido">${semanaActual.notas ? semanaActual.notas : ''}</div>
+            <div class="notas-semana-contenido" id="notasSemanaContenido"></div>
         </div>
 
         <div class="estado-sistema">
@@ -169,6 +169,11 @@ function actualizarInfoSemana() {
             📍 Chile - ${formatearFechaCorta(new Date())}
         </div>
     `;
+
+    // Las notas se asignan como texto (no como HTML) para que ningún
+    // carácter como "<" se interprete como una etiqueta. Sin notas el
+    // contenedor queda vacío y el CSS muestra el mensaje por defecto.
+    document.getElementById('notasSemanaContenido').textContent = semanaActual.notas || '';
 }
 
 // ============================================================

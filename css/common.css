@@ -506,6 +506,9 @@ button:active {
 .notas-semana-contenido {
     line-height: 1.5;
     font-size: 0.9rem;
+    /* Respeta los saltos de línea escritos en las notas */
+    white-space: pre-line;
+    overflow-wrap: anywhere;
 }
 
 .notas-semana-contenido:empty::before {

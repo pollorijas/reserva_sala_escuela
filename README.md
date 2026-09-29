@@ -41,9 +41,12 @@ El sistema usa dos niveles de acceso **sin pedir login a los profesores**:
 
 - **Profesores (sin contraseña):** el navegador usa la clave pública (anon) de
   Supabase, que con Row Level Security activo solo puede **leer** los datos y
-  **crear reservas**. Nada más.
-- **Administradores (con contraseña):** editar/liberar reservas, crear semanas,
-  y editar notas pasan por funciones de Netlify que validan la
+  **crear reservas de cursos de 1° a 8° Básico**. Nada más. La base de datos
+  además valida cada reserva: largo máximo de los textos, fecha dentro de la
+  semana indicada y bloque acorde al día (viernes / lunes a jueves).
+- **Administradores (con contraseña):** crear, editar y liberar reservas (incluidos
+  los usos administrativos: Mantención, UTP, Senda Previene, Feriado y Vacaciones),
+  crear semanas y editar notas pasan por funciones de Netlify que validan la
   contraseña (`ADMIN_PASSWORD`) y usan la clave `service_role` de Supabase,
   que nunca llega al navegador. La contraseña se pide una vez al abrir
   `admin.html` y dura mientras la pestaña esté abierta.
@@ -51,8 +54,10 @@ El sistema usa dos niveles de acceso **sin pedir login a los profesores**:
 ### Activar la seguridad (una sola vez)
 
 1. **Supabase**: abrir *SQL Editor*, pegar el contenido de `db/seguridad.sql`
-   y ejecutarlo. Esto activa RLS y agrega la restricción que impide reservar
-   dos veces el mismo bloque.
+   y ejecutarlo (se puede repetir sin problema). Esto activa RLS, elimina
+   políticas antiguas que dejaban las tablas abiertas, impide reservar dos
+   veces el mismo bloque, valida cada reserva y registra cuándo se creó
+   (columna `creado_en`).
 2. **Netlify**: en *Site settings → Environment variables* agregar:
    - `ADMIN_PASSWORD` = contraseña que usará el administrador
    - `SUPABASE_SERVICE_ROLE_KEY` = clave `service_role` del proyecto

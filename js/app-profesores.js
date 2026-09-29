@@ -244,6 +244,11 @@ document.getElementById('formRegistro').onsubmit = async function(e) {
         console.error('Error guardando reserva:', error);
         if (error.code === '23505') {
             mostrarError('Este bloque ya ha sido reservado. Por favor, actualice la página.');
+        } else if (error.code === '23514') {
+            // Regla de la base de datos (largo máximo o fecha/bloque incoherentes)
+            mostrarError('No se pudo registrar la reserva: ' + error.message);
+        } else if (error.code === '42501') {
+            mostrarError('Esta reserva no está permitida. Revise el curso seleccionado.');
         } else {
             mostrarError('Error al guardar la reserva: ' + error.message);
         }

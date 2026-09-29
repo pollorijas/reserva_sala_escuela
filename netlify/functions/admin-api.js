@@ -159,6 +159,20 @@ exports.handler = async (event) => {
                 return respuesta(200, { ok: true });
             }
 
+            case 'crearReserva': {
+                // A diferencia de la inserción pública (limitada a cursos de 1° a 8°),
+                // el administrador puede crear también reservas de uso administrativo
+                // (Mantención, UTP, Feriado, etc.)
+                const reserva = filtrarCampos(datos, [
+                    'semana_id', 'bloque_id', 'curso', 'profesor', 'actividad', 'observaciones', 'fecha'
+                ]);
+                if (!reserva.semana_id || !reserva.bloque_id || !reserva.curso || !reserva.profesor || !reserva.fecha) {
+                    return respuesta(400, { error: 'Faltan datos de la reserva.' });
+                }
+                const creada = await supabaseAdmin('POST', 'reservas', [reserva]);
+                return respuesta(200, { ok: true, reserva: creada && creada[0] });
+            }
+
             case 'actualizarReserva': {
                 const id = idValido(datos.id);
                 if (!id) return respuesta(400, { error: 'Identificador de reserva inválido.' });
@@ -186,6 +200,10 @@ exports.handler = async (event) => {
         console.error(`Error ejecutando acción "${accion}":`, error);
         if (error.codigo === '23505') {
             return respuesta(409, { error: 'Ese bloque ya tiene una reserva en esa fecha.' });
+        }
+        // Reglas de la base de datos (largos máximos, fecha/bloque coherentes)
+        if (error.codigo === '23514') {
+            return respuesta(400, { error: error.message });
         }
         return respuesta(500, { error: error.message || 'Error interno del servidor.' });
     }

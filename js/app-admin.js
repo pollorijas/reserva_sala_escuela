@@ -281,8 +281,9 @@ function abrirModalEdicion(reserva, bloque, dia, nombreDia) {
 }
 
 // Guardar reserva (nueva o edición)
-// La creación usa la inserción pública (igual que los profesores);
-// la edición requiere la sesión de administrador (admin-api).
+// Ambas pasan por admin-api: la inserción pública de la base de datos
+// solo acepta cursos de 1° a 8°, y el administrador también puede crear
+// reservas de uso administrativo (Mantención, UTP, Feriado, etc.).
 document.getElementById('formRegistro').onsubmit = async function(e) {
     e.preventDefault();
 
@@ -301,14 +302,7 @@ document.getElementById('formRegistro').onsubmit = async function(e) {
         if (reservaId) {
             await llamarAdminAPI('actualizarReserva', { id: parseInt(reservaId), ...reservaData });
         } else {
-            const { error } = await supabaseDB
-                .from('reservas')
-                .insert([reservaData]);
-            if (error) {
-                throw new Error(error.code === '23505'
-                    ? 'Ese bloque ya tiene una reserva en esa fecha.'
-                    : error.message);
-            }
+            await llamarAdminAPI('crearReserva', reservaData);
         }
 
         cerrarModal();

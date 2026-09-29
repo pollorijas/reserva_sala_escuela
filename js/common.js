@@ -264,31 +264,45 @@ function inicializarSelectorSemanas(semanas, semanaActivaId, onSeleccion) {
     marcarSemanaActiva(semanaActivaId, true);
 }
 
-// Arrastre con mouse (en pantallas táctiles el scroll nativo ya funciona)
+// Arrastre con mouse (en pantallas táctiles el scroll nativo ya funciona).
+// El arrastre solo comienza cuando el mouse se mueve más de 5 píxeles con el
+// botón presionado. Capturar el mouse desde el primer momento haría que un
+// simple click sobre una semana se enviara a la lista y no a la semana.
 function configurarArrastrePista(pista) {
+    const UMBRAL_ARRASTRE = 5;
+    let presionado = false;
     let arrastrando = false;
     let inicioX = 0;
     let scrollInicial = 0;
 
     pista.addEventListener('pointerdown', (e) => {
-        if (e.pointerType !== 'mouse') return;
-        arrastrando = true;
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        presionado = true;
+        arrastrando = false;
         _selectorSemanas.arrastro = false;
         inicioX = e.clientX;
         scrollInicial = pista.scrollLeft;
-        pista.classList.add('arrastrando');
-        pista.setPointerCapture(e.pointerId);
     });
 
     pista.addEventListener('pointermove', (e) => {
-        if (!arrastrando) return;
+        if (!presionado) return;
         const delta = e.clientX - inicioX;
-        if (Math.abs(delta) > 5) _selectorSemanas.arrastro = true;
-        pista.scrollLeft = scrollInicial - delta;
+
+        if (!arrastrando && Math.abs(delta) > UMBRAL_ARRASTRE) {
+            arrastrando = true;
+            _selectorSemanas.arrastro = true;
+            pista.classList.add('arrastrando');
+            pista.setPointerCapture(e.pointerId);
+        }
+
+        if (arrastrando) pista.scrollLeft = scrollInicial - delta;
     });
 
     const terminar = (e) => {
+        if (!presionado) return;
+        presionado = false;
         if (!arrastrando) return;
+
         arrastrando = false;
         pista.classList.remove('arrastrando');
         if (e.pointerId !== undefined && pista.hasPointerCapture(e.pointerId)) {

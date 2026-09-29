@@ -13,7 +13,8 @@ Sistema web para gestión de uso de salas educativas con dos interfaces:
 - `js/informe.js` - Informe estadístico de uso con descarga en PDF (admin)
 - `js/admin-api.js` - Sesión de administrador y comunicación con la API protegida
 - `netlify/functions/admin-api.js` - Función serverless con las operaciones de administrador
-- `db/seguridad.sql` - Script de seguridad para Supabase (RLS + restricción de duplicados)
+- `db/seguridad.sql` - Script de seguridad para Supabase (RLS, validación de reservas, restricción de duplicados)
+- `tests/` - Pruebas automáticas (ver sección Pruebas)
 
 ## Características
 
@@ -90,6 +91,31 @@ git (commit `3338895`, archivos `js/correo.js` y
 `netlify/functions/enviar-correo.js`) por si se decide retomarlo con otro
 servicio de correo. La variable `RESEND_API_KEY` en Netlify ya no se usa y
 puede eliminarse.
+
+## Pruebas
+
+Hay pruebas automáticas en la carpeta `tests/`, con sus propias dependencias
+(no se instalan al desplegar en Netlify). No usan la base de datos real: simulan
+Supabase y la función de administrador.
+
+```bash
+cd tests
+npm install
+npx playwright install chromium   # solo la primera vez
+npm test                          # unitarias + de navegador
+```
+
+- `npm run test:unit`: unitarias (fechas, ocupación, CSV, función `admin-api`,
+  consistencia entre HTML y JS, y garantías de `db/seguridad.sql`).
+- `npm run test:e2e`: de navegador con Playwright. Recorren las páginas de
+  profesores (escritorio y celular) y de administradores: reservar, editar,
+  liberar, selector de semanas, ventanas, exportaciones y protección contra HTML
+  malicioso.
+- Si ya tienes un Chromium instalado: `CHROMIUM_PATH=/ruta/a/chromium npm run test:e2e`.
+- En GitHub se ejecutan solas en cada Pull Request (`.github/workflows/tests.yml`).
+
+> Las pruebas **no** verifican la base de datos real (políticas RLS, trigger de
+> validación): esas reglas se comprueban ejecutando `db/seguridad.sql` en Supabase.
 
 ## URLs de Acceso
 

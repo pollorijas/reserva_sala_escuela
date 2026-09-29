@@ -1,0 +1,46 @@
+name: Pruebas
+
+# Se ejecuta en cada Pull Request y en cada push a las ramas de trabajo.
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Instalar dependencias de las pruebas
+        run: npm ci
+
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Pruebas unitarias
+        run: npm run test:unit
+
+      - name: Pruebas de navegador
+        run: npm run test:e2e
+
+      - name: Guardar informe si algo falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informe-playwright
+          path: |
+            tests/playwright-report/
+            tests/test-results/
+          retention-days: 7

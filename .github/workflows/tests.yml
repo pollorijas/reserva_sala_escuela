@@ -1,11 +1,16 @@
 name: Pruebas
 
-# Se ejecuta en cada Pull Request y en cada push a las ramas de trabajo.
+# Se ejecuta en cada Pull Request (una vez por cambio) y al actualizar main.
 on:
   pull_request:
   push:
-    branches-ignore:
+    branches:
       - main
+
+# Un cambio nuevo cancela la ejecución anterior de la misma rama
+concurrency:
+  group: pruebas-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   pruebas:

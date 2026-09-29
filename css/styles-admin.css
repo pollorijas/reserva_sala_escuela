@@ -1,102 +1,78 @@
-body {
-    background: #f5f5f5;
-}
+/* Estilos específicos - versión Administradores */
 
 .info-institucional {
-    background: #fff3cd;
-    padding: 15px 20px;
-    border-radius: 8px;
-    border-left: 4px solid #ffc107;
+    background: var(--color-advertencia-suave);
+    padding: 14px 18px;
+    border-radius: var(--radio);
+    border-left: 4px solid var(--color-advertencia);
     margin-bottom: 20px;
 }
 
 .info-institucional p {
     margin: 0;
-    color: #856404;
+    color: #8a5d10;
     font-size: 14px;
 }
 
-.semana-selector {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.semana-selector label {
-    font-weight: bold;
-    white-space: nowrap;
-}
-
-.semana-selector select {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    min-width: 300px;
-}
-
-.info-semana {
-    background: white;
-    padding: 15px 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+/* ---------- Tabla de horarios (escritorio) ---------- */
+#tabla-container {
+    background: var(--color-tarjeta);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra-tarjeta);
+    overflow: hidden;
 }
 
 .tabla-horarios {
     width: 100%;
     border-collapse: collapse;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden;
+    background: var(--color-tarjeta);
 }
 
 .tabla-horarios th,
 .tabla-horarios td {
-    border: 1px solid #ddd;
-    padding: 12px;
+    border: 1px solid var(--color-borde);
+    padding: 10px;
     text-align: center;
 }
 
 .tabla-horarios th {
-    background-color: #34495e;
+    background-color: #33415c;
     color: white;
-    font-weight: bold;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .bloque-libre {
-    background-color: #d4edda;
+    background-color: var(--color-exito-suave);
+    color: var(--color-exito);
+    font-weight: 600;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
 .bloque-libre:hover {
-    background-color: #c3e6cb;
-    transform: scale(1.02);
+    background-color: #cdeeda;
 }
 
 .bloque-ocupado {
-    background-color: #fff3cd;
+    background-color: var(--color-advertencia-suave);
     cursor: pointer;
     transition: background-color 0.2s;
     position: relative;
 }
 
 .bloque-ocupado:hover {
-    background-color: #ffeaa7;
+    background-color: #fae6c3;
 }
 
 .bloque-ocupado::after {
     content: "✏️";
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: 3px;
+    right: 4px;
     font-size: 10px;
 }
 
@@ -106,131 +82,136 @@ body {
 }
 
 .bloque-ocupado .curso {
-    font-weight: bold;
+    font-weight: 700;
     display: block;
 }
 
 .bloque-ocupado .profesor {
     font-style: italic;
     display: block;
+    color: var(--color-texto-suave);
 }
 
-.advertencia-admin {
-    background: #d4edda;
-    border: 1px solid #c3e6cb;
-    border-radius: 4px;
-    padding: 12px;
-    margin: 15px 0;
-    font-size: 13px;
+.bloque-no-disponible {
+    background-color: #f8fafc;
+    color: #b0b8c4;
 }
 
-.advertencia-admin p {
-    margin: 0;
-    color: #155724;
-}
-
+/* ---------- Detalle de reserva (modales) ---------- */
 .info-reserva .info-item {
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     padding: 10px;
-    background: #f8f9fa;
-    border-radius: 4px;
+    background: #f8fafc;
+    border-radius: var(--radio-chico);
 }
 
 .info-reserva .info-item label {
-    font-weight: bold;
-    color: #495057;
+    font-weight: 700;
+    color: #4b5563;
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
+    font-size: 0.82rem;
 }
 
 .info-reserva .info-item span {
-    color: #212529;
     display: block;
-    padding: 5px 0;
-}
-
-.notas-semana {
-    background: #e3f2fd;
-    border-left: 4px solid #2196f3;
-    padding: 12px 15px;
-    margin: 10px 0;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.notas-semana strong {
-    color: #1976d2;
-}
-
-.sin-notas {
-    color: #6c757d;
-    font-style: italic;
-}
-
-.con-notas {
-    color: #28a745;
-    font-weight: 500;
-}
-
-.btn-editar-notas {
-    background-color: #17a2b8;
-    color: white;
-    padding: 8px 16px;
-    font-size: 14px;
-}
-
-.btn-editar-notas:hover {
-    background-color: #138496;
 }
 
 .info-semana-modal {
-    background: #f8f9fa;
+    background: #f8fafc;
     padding: 15px;
-    border-radius: 6px;
+    border-radius: var(--radio-chico);
     margin-bottom: 20px;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid var(--color-primario);
 }
 
 .info-semana-modal h4 {
     margin: 0 0 5px 0;
-    color: #2c3e50;
 }
 
 .info-semana-modal p {
     margin: 0;
-    color: #7f8c8d;
+    color: var(--color-texto-suave);
     font-size: 14px;
 }
 
-.helper-text {
-    font-size: 12px;
-    color: #6c757d;
-    margin-top: 5px;
-    font-style: italic;
+/* ---------- Informe estadístico ---------- */
+.modal-content.modal-informe {
+    width: min(760px, 92%);
 }
 
-.zona-horaria-info {
-    font-size: 12px;
-    color: #666;
-    margin-top: 5px;
-    padding: 5px;
-    background: #f8f9fa;
-    border-radius: 4px;
+.informe-grilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.informe-stat {
+    background: #f8fafc;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-chico);
+    padding: 14px;
     text-align: center;
 }
 
-.btn-warning {
-    background-color: #f39c12;
-    color: white;
+.informe-stat .valor {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--color-primario);
+    margin-bottom: 2px;
+    line-height: 1.3;
 }
 
-.btn-warning:hover {
-    background-color: #e67e22;
+.informe-stat .etiqueta {
+    font-size: 0.78rem;
+    color: var(--color-texto-suave);
 }
 
-/* Para el botón PDF específicamente */
-.btn-pdf {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-    color: white;
-    font-weight: bold;
+.informe-seccion {
+    margin-bottom: 20px;
+}
+
+.informe-seccion h4 {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.tabla-informe {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.tabla-informe th,
+.tabla-informe td {
+    border: 1px solid var(--color-borde);
+    padding: 7px 10px;
+    text-align: left;
+}
+
+.tabla-informe th {
+    background: #f1f5f9;
+    font-weight: 700;
+}
+
+.tabla-informe td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.barra-ocupacion {
+    background: #e8edf8;
+    border-radius: 4px;
+    height: 10px;
+    overflow: hidden;
+    min-width: 80px;
+}
+
+.barra-ocupacion > span {
+    display: block;
+    height: 100%;
+    background: var(--color-primario);
+    border-radius: 4px;
 }

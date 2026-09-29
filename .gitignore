@@ -16,3 +16,8 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Resultados de las pruebas automáticas
+tests/test-results/
+tests/playwright-report/
+tests/blob-report/

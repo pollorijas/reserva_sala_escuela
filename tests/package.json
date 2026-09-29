@@ -1,0 +1,16 @@
+{
+  "name": "reserva-sala-escuela-tests",
+  "private": true,
+  "description": "Pruebas automáticas del Sistema de Registro de Sala (separadas del sitio para que Netlify no las instale)",
+  "scripts": {
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "node --test \"unit/*.test.js\"",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@supabase/supabase-js": "2.*",
+    "jspdf": "2.5.1",
+    "jspdf-autotable": "3.5.28"
+  }
+}

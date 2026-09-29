@@ -1,37 +1,41 @@
 // ============================================================
 // Aplicación de administradores
 //
-// Secciones de este archivo:
-//   1. Estado global
-//   2. Inicialización
-//   3. Carga de datos (bloques, semanas, reservas)
-//   4. Panel de información de la semana
-//   5. Reservas (registrar, editar, liberar)
-//   6. Semanas (crear, corregir fechas)
-//   7. Notas de la semana
-//   8. Modales y confirmaciones
+// La carga de datos, el selector de semanas y el formulario de reserva
+// se comparten con la página de profesores (js/app-comun.js). Aquí solo
+// está lo propio del administrador.
 //
-// Las operaciones que modifican datos protegidos (editar/eliminar
-// reservas, crear semanas, notas) pasan por llamarAdminAPI()
+// Secciones de este archivo:
+//   1. Registro de la página
+//   2. Inicialización
+//   3. Panel de información de la semana
+//   4. Reservas (editar, guardar, liberar)
+//   5. Semanas (crear, corregir fechas)
+//   6. Notas de la semana
+//   7. Modales y confirmaciones
+//
+// Las operaciones que modifican datos protegidos (crear, editar y
+// eliminar reservas, crear semanas, notas) pasan por llamarAdminAPI()
 // definida en js/admin-api.js.
 // ============================================================
 
 // ============================================================
-// 1. Estado global
+// 1. Registro de la página
 // ============================================================
-let semanaActual = null;
-let listaSemanas = [];
-let bloques = [];
-let reservas = [];
-let reservaSeleccionada = null;
+registrarApp({
+    onLibre: abrirModalRegistro,
+    onOcupada: abrirModalEdicion,
+    actualizarInfoSemana,
+    mensajeSinSemanas: 'No hay semanas creadas. Use "Nueva Semana" para comenzar.',
+    cursosAdministrativos: true // también ve Mantención, UTP, Senda Previene, Feriado y Vacaciones
+});
 
 // ============================================================
 // 2. Inicialización
 // ============================================================
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Inicializando aplicación para administradores...');
-    await cargarBloques();
-    await cargarSemanas();
+    await iniciarApp();
 
     document.getElementById('formNuevaSemana').onsubmit = crearNuevaSemana;
     document.getElementById('formEditarNotas').onsubmit = guardarNotasSemana;
@@ -44,153 +48,40 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ============================================================
-// 3. Carga de datos
+// 3. Panel de información de la semana
 // ============================================================
-async function cargarBloques() {
-    const { data, error } = await supabaseDB
-        .from('bloques')
-        .select('*')
-        .order('dia_semana')
-        .order('numero_bloque');
 
-    if (error) {
-        console.error('Error cargando bloques:', error);
-        mostrarError('Error al cargar bloques horarios: ' + error.message);
-        return;
-    }
+// Fecha de la última reserva registrada en la semana, o 'N/A' si no hay
+function textoUltimaReserva() {
+    let fechaMax = null;
 
-    bloques = data;
-}
-
-async function cargarSemanas() {
-    const { data, error } = await supabaseDB
-        .from('semanas')
-        .select('*')
-        .order('fecha_inicio', { ascending: false });
-
-    if (error) {
-        console.error('Error cargando semanas:', error);
-        mostrarError('Error al cargar semanas: ' + error.message);
-        return;
-    }
-
-    listaSemanas = data || [];
-
-    if (listaSemanas.length === 0) {
-        inicializarSelectorSemanas([], null, null);
-        mostrarAviso('No hay semanas creadas. Use "Nueva Semana" para comenzar.');
-        return;
-    }
-
-    // Determinar la semana actual basada en la fecha de hoy
-    const hoyStr = hoyISO();
-    let semanaActualEncontrada = listaSemanas.find(semana =>
-        semana.fecha_inicio <= hoyStr && semana.fecha_fin >= hoyStr
-    );
-
-    if (!semanaActualEncontrada) {
-        semanaActualEncontrada = listaSemanas[0];
-    }
-
-    semanaActual = semanaActualEncontrada;
-
-    inicializarSelectorSemanas(listaSemanas, semanaActual.id, async (semana) => {
-        semanaActual = semana;
-        await cargarReservasSemana(semana.id);
+    reservas.forEach(reserva => {
+        const fechaReserva = new Date(reserva.fecha + 'T12:00:00-03:00');
+        if (!isNaN(fechaReserva.getTime()) && (!fechaMax || fechaReserva > fechaMax)) {
+            fechaMax = fechaReserva;
+        }
     });
 
-    await cargarReservasSemana(semanaActual.id);
+    return fechaMax ? formatearFechaCorta(fechaMax) : 'N/A';
 }
 
-async function cargarReservasSemana(semanaId) {
-    const { data, error } = await supabaseDB
-        .from('reservas')
-        .select('*')
-        .eq('semana_id', semanaId);
-
-    if (error) {
-        console.error('Error cargando reservas:', error);
-        mostrarError('Error al cargar reservas: ' + error.message);
-        return;
-    }
-
-    reservas = data || [];
-
-    renderizarHorario({
-        bloques,
-        reservas,
-        semana: semanaActual,
-        onLibre: (bloque, dia, nombreDia) => abrirModalRegistro(bloque, dia, nombreDia),
-        onOcupada: (reserva, bloque, dia, nombreDia) => abrirModalEdicion(reserva, bloque, dia, nombreDia)
-    });
-
-    actualizarInfoSemana();
-}
-
-// ============================================================
-// 4. Panel de información de la semana
-// ============================================================
 function actualizarInfoSemana() {
-    const infoContainer = document.getElementById('infoSemana');
-    if (!semanaActual) {
-        infoContainer.innerHTML = '<p>No hay semana seleccionada</p>';
-        return;
-    }
+    const panel = prepararPanelSemana();
+    if (!panel) return;
 
-    const reservasCount = reservas.length;
-    const bloquesTotales = calcularTotalBloquesSemana(bloques);
-    const porcentajeOcupacion = bloquesTotales > 0 ? Math.round(reservasCount / bloquesTotales * 100) : 0;
-    const bloquesDisponibles = bloquesTotales - reservasCount;
-
+    const estadisticas = calcularEstadisticasSemana();
     const ocupacionPorDia = calcularOcupacionPorDia(bloques, reservas, semanaActual);
 
-    // Última reserva registrada de la semana
-    let ultimaReservaTexto = 'N/A';
-    if (reservas.length > 0) {
-        let fechaMax = null;
-        reservas.forEach(reserva => {
-            const fechaReserva = new Date(reserva.fecha + 'T12:00:00-03:00');
-            if (!isNaN(fechaReserva.getTime()) && (!fechaMax || fechaReserva > fechaMax)) {
-                fechaMax = fechaReserva;
-            }
-        });
-        if (fechaMax) ultimaReservaTexto = formatearFechaCorta(fechaMax);
-    }
-
-    infoContainer.classList.add('admin');
-    infoContainer.innerHTML = `
-        <div class="info-semana-header">
-            <div class="info-semana-titulo">
-                <h3>📅 Semana ${semanaActual.numero_semana}</h3>
-                <p>${formatearFecha(semanaActual.fecha_inicio)} - ${formatearFecha(semanaActual.fecha_fin)}</p>
-            </div>
-
-            <div class="info-semana-estadisticas">
-                <div class="estadistica-principal">
-                    <span class="porcentaje-ocupacion">${porcentajeOcupacion}%</span>
-                    <span class="texto-estadistica">ocupación</span>
-                </div>
-                <div class="detalles-estadistica">
-                    <div class="detalle-item">
-                        <strong>${reservasCount}</strong>
-                        <div>ocupados</div>
-                    </div>
-                    <div class="detalle-item">
-                        <strong>${bloquesDisponibles}</strong>
-                        <div>libres</div>
-                    </div>
-                </div>
-            </div>
-
+    const botonEditarNotas = `
             <button onclick="abrirModalEditarNotas()" class="btn-editar-notas">
                 ✏️ Editar Notas
-            </button>
-        </div>
+            </button>`;
 
+    const tarjetasDetalle = `
         <div class="info-semana-detalles">
             <div class="detalle-card">
                 <span class="icono">📋</span>
-                <span class="valor">${bloquesTotales}</span>
+                <span class="valor">${estadisticas.total}</span>
                 <span class="etiqueta">Total bloques</span>
             </div>
             <div class="detalle-card">
@@ -205,56 +96,26 @@ function actualizarInfoSemana() {
             </div>
             <div class="detalle-card">
                 <span class="icono">🔄</span>
-                <span class="valor">${ultimaReservaTexto}</span>
+                <span class="valor">${textoUltimaReserva()}</span>
                 <span class="etiqueta">Última reserva</span>
             </div>
         </div>
-
-        <div class="notas-semana-container ${!semanaActual.notas ? 'sin-notas' : ''}">
-            <div class="notas-semana-titulo">
-                <span class="icono">📌</span>
-                <span>Información importante</span>
-            </div>
-            <div class="notas-semana-contenido" id="notasSemanaContenido"></div>
-        </div>
-
-        <div class="zona-horaria-info">
-            📍 Chile - ${formatearFechaCorta(new Date())}
-        </div>
     `;
 
-    // Las notas se asignan como texto (no como HTML) para que ningún
-    // carácter como "<" se interprete como una etiqueta
-    document.getElementById('notasSemanaContenido').textContent = semanaActual.notas ||
-        'No hay notas específicas. Click en "Editar Notas" para agregar información importante.';
+    panel.classList.add('admin');
+    panel.innerHTML =
+        htmlEncabezadoSemana(estadisticas, botonEditarNotas) +
+        tarjetasDetalle +
+        htmlNotasSemana() +
+        htmlZonaHoraria();
+
+    mostrarNotasSemana('No hay notas específicas. Click en "Editar Notas" para agregar información importante.');
 }
 
 // ============================================================
-// 5. Reservas (registrar, editar, liberar)
+// 4. Reservas (editar, guardar, liberar)
+//    Registrar en un bloque libre (abrirModalRegistro) está en app-comun.js
 // ============================================================
-
-// Registrar nueva reserva (bloque libre)
-function abrirModalRegistro(bloque, dia, nombreDia) {
-    if (!semanaActual) return;
-
-    const fecha = calcularFecha(semanaActual.fecha_inicio, dia);
-
-    document.getElementById('bloqueSeleccionado').value = bloque.id;
-    document.getElementById('fechaSeleccionada').value = fecha;
-    document.getElementById('reservaId').value = '';
-
-    document.getElementById('tituloModalRegistro').textContent =
-        `Registrar Uso - ${nombreDia} Bloque ${bloque.numero_bloque} (${bloque.hora_inicio} - ${bloque.hora_fin})`;
-
-    document.getElementById('btnLiberar').style.display = 'none';
-    document.getElementById('formRegistro').reset();
-
-    // El administrador ve también las opciones de uso administrativo
-    const selectCurso = document.getElementById('inputCurso');
-    cargarCursosEnSelect(selectCurso, '', true);
-
-    document.getElementById('modalRegistro').style.display = 'block';
-}
 
 // Editar reserva existente
 function abrirModalEdicion(reserva, bloque, dia, nombreDia) {
@@ -288,15 +149,7 @@ document.getElementById('formRegistro').onsubmit = async function(e) {
     e.preventDefault();
 
     const reservaId = document.getElementById('reservaId').value;
-    const reservaData = {
-        semana_id: semanaActual.id,
-        bloque_id: parseInt(document.getElementById('bloqueSeleccionado').value),
-        curso: document.getElementById('inputCurso').value.trim(),
-        profesor: document.getElementById('inputProfesor').value.trim(),
-        actividad: document.getElementById('inputActividad').value.trim(),
-        observaciones: document.getElementById('inputObservaciones').value.trim(),
-        fecha: document.getElementById('fechaSeleccionada').value
-    };
+    const reservaData = leerDatosFormularioReserva();
 
     try {
         if (reservaId) {
@@ -343,7 +196,7 @@ async function liberarBloque() {
 }
 
 // ============================================================
-// 6. Semanas (crear, corregir fechas)
+// 5. Semanas (crear, corregir fechas)
 // ============================================================
 
 // Número sugerido para una nueva semana: continúa la numeración de
@@ -465,7 +318,7 @@ async function validarSemanasExistentes() {
 }
 
 // ============================================================
-// 7. Notas de la semana
+// 6. Notas de la semana
 // ============================================================
 function abrirModalEditarNotas() {
     if (!semanaActual) {
@@ -528,14 +381,9 @@ async function eliminarNotasSemana() {
 }
 
 // ============================================================
-// 8. Modales y confirmaciones
+// 7. Modales y confirmaciones
+//    (cerrarModal, el de la reserva, está en app-comun.js)
 // ============================================================
-function cerrarModal() {
-    document.getElementById('modalRegistro').style.display = 'none';
-    document.getElementById('formRegistro').reset();
-    reservaSeleccionada = null;
-}
-
 function cerrarModalNuevaSemana() {
     document.getElementById('modalNuevaSemana').style.display = 'none';
     document.getElementById('formNuevaSemana').reset();

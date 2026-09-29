@@ -8,7 +8,8 @@ Sistema web para gestión de uso de salas educativas con dos interfaces:
 - `admin.html` - Versión para administradores
 - `profesores.html` - Versión para profesores
 - `js/common.js` - Configuración de Supabase, utilidades, selector de semanas y renderizado del horario
-- `js/app-admin.js` / `js/app-profesores.js` - Lógica de cada versión
+- `js/app-comun.js` - Lógica compartida por ambas páginas: carga de datos, selector de semanas, piezas del panel de la semana y formulario de reserva
+- `js/app-admin.js` / `js/app-profesores.js` - Solo lo propio de cada versión (se registran en app-comun.js con `registrarApp()`)
 - `js/exportar.js` - Exportación CSV y PDF del horario semanal (admin)
 - `js/informe.js` - Informe estadístico de uso con descarga en PDF (admin)
 - `js/admin-api.js` - Sesión de administrador y comunicación con la API protegida

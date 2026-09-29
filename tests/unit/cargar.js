@@ -11,7 +11,11 @@ process.env.TZ = 'America/Santiago';
 
 const RAIZ = path.resolve(__dirname, '..', '..');
 
-function crearContexto() {
+// opciones.elementos → { id: objetoSimulado } devueltos por document.getElementById(id)
+// opciones.tablas    → { nombreTabla: filas } que devuelve la base de datos simulada
+function crearContexto(opciones = {}) {
+    const { elementos = {}, tablas = {} } = opciones;
+
     const elementoFalso = new Proxy(function () {}, {
         get: (_, prop) => (prop === 'style' || prop === 'classList' ? elementoFalso : elementoFalso),
         set: () => true,
@@ -20,10 +24,10 @@ function crearContexto() {
 
     const contexto = {
         console,
-        window: { supabase: { createClient: () => ({}) } },
+        window: { supabase: { createClient: () => crearBaseDeDatosSimulada(tablas) } },
         document: {
             addEventListener: () => {},
-            getElementById: () => elementoFalso,
+            getElementById: (id) => elementos[id] || elementoFalso,
             querySelector: () => elementoFalso,
             querySelectorAll: () => []
         },
@@ -32,11 +36,30 @@ function crearContexto() {
     return vm.createContext(contexto);
 }
 
+// Imita el encadenado de supabase-js: from(tabla).select().order().eq() se puede esperar (await)
+function crearBaseDeDatosSimulada(tablas) {
+    return {
+        from(tabla) {
+            const consulta = {
+                select: () => consulta,
+                order: () => consulta,
+                eq: () => consulta,
+                then: (resolver) => resolver({ data: tablas[tabla] || [], error: null })
+            };
+            return consulta;
+        }
+    };
+}
+
 // Ejecuta los archivos indicados (rutas relativas a la raíz del repositorio)
 // en un mismo contexto y lo devuelve. Las funciones declaradas quedan
 // disponibles como propiedades del contexto.
 function cargarScripts(...archivos) {
-    const contexto = crearContexto();
+    return cargarScriptsConOpciones({}, ...archivos);
+}
+
+function cargarScriptsConOpciones(opciones, ...archivos) {
+    const contexto = crearContexto(opciones);
     archivos.forEach(archivo => {
         const codigo = fs.readFileSync(path.join(RAIZ, archivo), 'utf8');
         vm.runInContext(codigo, contexto, { filename: archivo });
@@ -50,4 +73,4 @@ function evaluar(contexto, codigo) {
     return vm.runInContext(codigo, contexto);
 }
 
-module.exports = { RAIZ, cargarScripts, evaluar };
+module.exports = { RAIZ, cargarScripts, cargarScriptsConOpciones, evaluar };

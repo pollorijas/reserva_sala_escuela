@@ -66,7 +66,7 @@ test('PDF: un texto de justo el largo máximo no se recorta', () => {
 });
 
 // ---------- Numeración sugerida de semanas ----------
-const app = cargarScripts('js/common.js', 'js/app-admin.js');
+const app = cargarScripts('js/common.js', 'js/app-comun.js', 'js/app-admin.js');
 const asignarSemanas = (semanas) => evaluar(app, `listaSemanas = ${JSON.stringify(semanas)}`);
 
 test('semana sugerida: la primera semana del año parte en 1', () => {

@@ -47,8 +47,8 @@ test('los identificadores usados con getElementById existen en el HTML de la pá
         'notasSemanaContenido', 'tablaHorarios'
     ]);
     const paginas = {
-        'admin.html': ['js/common.js', 'js/admin-api.js', 'js/app-admin.js', 'js/exportar.js', 'js/informe.js'],
-        'profesores.html': ['js/common.js', 'js/app-profesores.js']
+        'admin.html': ['js/common.js', 'js/admin-api.js', 'js/app-comun.js', 'js/app-admin.js', 'js/exportar.js', 'js/informe.js'],
+        'profesores.html': ['js/common.js', 'js/app-comun.js', 'js/app-profesores.js']
     };
     for (const [pagina, scripts] of Object.entries(paginas)) {
         const html = leer(pagina);
@@ -56,9 +56,10 @@ test('los identificadores usados con getElementById existen en el HTML de la pá
         const ids = new Set([...codigo.matchAll(/getElementById\('([^']+)'\)/g)].map(m => m[1]));
         ids.forEach(id => {
             if (dinamicos.has(id)) return;
-            // Algunos ids de common.js solo existen en la página de administración o de profesores
-            const enOtraPagina = ['inputCursoEditar', 'contenedorToasts'].includes(id);
-            if (enOtraPagina) return;
+            // Elementos que el código compartido consulta solo si existen en esa página
+            const opcionales = { 'profesores.html': ['reservaId', 'btnLiberar'] };
+            if ((opcionales[pagina] || []).includes(id)) return;
+            if (['inputCursoEditar', 'contenedorToasts'].includes(id)) return;
             assert.ok(html.includes(`id="${id}"`), `${pagina}: falta el elemento id="${id}" que usa el JavaScript`);
         });
     }

@@ -135,26 +135,6 @@
     font-size: 14px;
 }
 
-/* ---------- Correo a profesores ---------- */
-.resumen-correo {
-    background: #f8fafc;
-    border: 1px solid var(--color-borde);
-    border-radius: var(--radio-chico);
-    padding: 12px 14px;
-    margin-bottom: 16px;
-    font-size: 0.88rem;
-    max-height: 180px;
-    overflow-y: auto;
-}
-
-.resumen-correo ul {
-    margin: 6px 0 0 18px;
-}
-
-.resumen-correo li {
-    margin-bottom: 4px;
-}
-
 /* ---------- Informe estadístico ---------- */
 .modal-content.modal-informe {
     width: min(760px, 92%);

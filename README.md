@@ -10,11 +10,9 @@ Sistema web para gestión de uso de salas educativas con dos interfaces:
 - `js/common.js` - Configuración de Supabase, utilidades, selector de semanas y renderizado del horario
 - `js/app-admin.js` / `js/app-profesores.js` - Lógica de cada versión
 - `js/exportar.js` - Exportación CSV y PDF del horario semanal (admin)
-- `js/correo.js` - Notificación de horarios por correo a profesores (admin)
 - `js/informe.js` - Informe estadístico de uso con descarga en PDF (admin)
 - `js/admin-api.js` - Sesión de administrador y comunicación con la API protegida
 - `netlify/functions/admin-api.js` - Función serverless con las operaciones de administrador
-- `netlify/functions/enviar-correo.js` - Función serverless que envía los correos
 - `db/seguridad.sql` - Script de seguridad para Supabase (RLS + restricción de duplicados)
 
 ## Características
@@ -24,7 +22,6 @@ Sistema web para gestión de uso de salas educativas con dos interfaces:
 - Crear, modificar y eliminar reservas
 - Editar notas de las semanas
 - Exportación del horario semanal en PDF (bloques disponibles/ocupados) y CSV
-- Envío de correos a profesores con sus horarios reservados
 - Informe estadístico: días y horarios más ocupados, cursos y profesores que más usan la sala (descargable en PDF)
 
 ### 👩‍🏫 Profesores
@@ -46,7 +43,7 @@ El sistema usa dos niveles de acceso **sin pedir login a los profesores**:
   Supabase, que con Row Level Security activo solo puede **leer** los datos y
   **crear reservas**. Nada más.
 - **Administradores (con contraseña):** editar/liberar reservas, crear semanas,
-  editar notas y enviar correos pasan por funciones de Netlify que validan la
+  y editar notas pasan por funciones de Netlify que validan la
   contraseña (`ADMIN_PASSWORD`) y usan la clave `service_role` de Supabase,
   que nunca llega al navegador. La contraseña se pide una vez al abrir
   `admin.html` y dura mientras la pestaña esté abierta.
@@ -79,23 +76,15 @@ El sistema usa dos niveles de acceso **sin pedir login a los profesores**:
 
 4. Desplegar en Netlify y configurar las variables de entorno.
 
-### Envío de correos (Resend)
+### Envío de correos (deshabilitado temporalmente)
 
-El envío de correos usa la función serverless `netlify/functions/enviar-correo.js`
-con la API de [Resend](https://resend.com). Para activarlo:
-
-1. Crear una cuenta gratuita en Resend y generar una API key.
-2. En Netlify: **Site settings → Environment variables**, agregar:
-   - `RESEND_API_KEY` = la API key de Resend (obligatoria)
-   - `ADMIN_PASSWORD` = contraseña de administrador (obligatoria; el envío
-     de correos la exige para que terceros no usen la cuota de la cuenta)
-   - `EMAIL_FROM` = remitente verificado, ej. `sala@tuescuela.cl` (opcional)
-3. Volver a desplegar el sitio.
-
-> Sin `EMAIL_FROM` se usa `onboarding@resend.dev`, que **solo permite enviar
-> correos a la dirección del dueño de la cuenta Resend** (útil para pruebas).
-> Para enviar a los profesores hay que verificar un dominio propio en Resend
-> y configurar `EMAIL_FROM` con una dirección de ese dominio.
+El aviso por correo a los profesores está **desactivado**: los correos
+institucionales ya no permiten este tipo de envío. Se retiró el botón, el
+modal y la función de Netlify. El código sigue disponible en el historial de
+git (commit `3338895`, archivos `js/correo.js` y
+`netlify/functions/enviar-correo.js`) por si se decide retomarlo con otro
+servicio de correo. La variable `RESEND_API_KEY` en Netlify ya no se usa y
+puede eliminarse.
 
 ## URLs de Acceso
 
@@ -109,7 +98,6 @@ con la API de [Resend](https://resend.com). Para activarlo:
 - Supabase (base de datos)
 - Netlify (hosting y funciones serverless)
 - jsPDF + jsPDF-AutoTable (generación de PDF)
-- Resend (envío de correos)
 
 ## Estructura de Base de Datos
 

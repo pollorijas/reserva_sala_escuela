@@ -28,7 +28,6 @@
                 <button onclick="abrirModalNuevaSemana()" class="btn-primary">➕ Nueva Semana</button>
                 <button onclick="exportarDatos()" class="btn-success">📥 Exportar CSV</button>
                 <button onclick="exportarPDFSemana()" class="btn-warning">📄 Exportar PDF</button>
-                <button onclick="abrirModalCorreo()" class="btn-primary">📧 Notificar Profesor</button>
                 <button onclick="abrirModalInforme()" class="btn-secondary">📊 Informe de Uso</button>
             </div>
         </div>
@@ -164,46 +163,6 @@
         </div>
     </div>
 
-    <!-- Modal para enviar correo a un profesor -->
-    <div id="modalCorreo" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="cerrarModalCorreo()">&times;</span>
-            <h3>📧 Notificar horarios a un profesor</h3>
-            <form id="formCorreo">
-                <div class="form-group">
-                    <label for="selectProfesorCorreo">Profesor:</label>
-                    <select id="selectProfesorCorreo" required>
-                        <option value="">Seleccione un profesor</option>
-                    </select>
-                    <div class="helper-text">
-                        Se listan los profesores con reservas en la semana seleccionada
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="inputCorreoProfesor">Correo electrónico:</label>
-                    <input type="email" id="inputCorreoProfesor" required
-                        placeholder="profesor@escuela.cl" autocomplete="email">
-                </div>
-
-                <div class="resumen-correo" id="resumenCorreo">
-                    Seleccione un profesor para ver el resumen de sus reservas.
-                </div>
-
-                <div class="form-group">
-                    <label for="inputMensajeCorreo">Mensaje adicional (opcional):</label>
-                    <textarea id="inputMensajeCorreo"
-                        placeholder="Ej: Recuerde llegar 5 minutos antes para encender los equipos..."></textarea>
-                </div>
-
-                <div class="form-buttons">
-                    <button type="submit" class="btn-primary" id="btnEnviarCorreo">Enviar Correo</button>
-                    <button type="button" onclick="cerrarModalCorreo()" class="btn-secondary">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- Modal de informe estadístico -->
     <div id="modalInforme" class="modal">
         <div class="modal-content modal-informe">
@@ -261,7 +220,6 @@
     <script src="js/admin-api.js"></script>
     <script src="js/app-admin.js"></script>
     <script src="js/exportar.js"></script>
-    <script src="js/correo.js"></script>
     <script src="js/informe.js"></script>
 
 </body>
